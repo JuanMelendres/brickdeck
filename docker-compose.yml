@@ -1,0 +1,18 @@
+# docker-compose.yml
+
+services:
+  brickdeck-postgres:
+    image: postgres:16-alpine
+    container_name: brickdeck-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: brickdeck
+      POSTGRES_USER: brickdeck
+      POSTGRES_PASSWORD: brickdeck
+    ports:
+      - "5433:5432"
+    volumes:
+      - brickdeck_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  brickdeck_postgres_data:

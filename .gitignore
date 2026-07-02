@@ -1,33 +1,75 @@
-# Java
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs / Editors
+# =========================
+.idea/
+*.iws
+*.iml
+*.ipr
+
+.vscode/
+*.code-workspace
+
+# =========================
+# Java / Maven / Spring Boot
+# =========================
 target/
 *.class
 *.jar
 *.war
 *.ear
 
-# IntelliJ
-.idea/
-*.iml
+# Maven local files
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
-# VS Code
-.vscode/
+# Spring Initializr helper
+HELP.md
 
-# Node / Next
+# Logs
+*.log
+logs/
+
+# =========================
+# Node / Next.js
+# =========================
 node_modules/
 .next/
 out/
 dist/
+build/
+.turbo/
+.vercel/
 
-# Env
+# =========================
+# Test / Coverage
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# Environment files
+# =========================
 .env
-.env.local
-.env.*.local
-.env.dev
-.env.prod
+.env.*
+!.env.example
+!.env.*.example
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Docker
+# =========================
+# Docker / Local volumes
+# =========================
 postgres-data/
+docker-data/
+data/
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+.cache/
