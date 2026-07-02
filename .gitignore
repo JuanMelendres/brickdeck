@@ -1,0 +1,33 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Node / Next
+node_modules/
+.next/
+out/
+dist/
+
+# Env
+.env
+.env.local
+.env.*.local
+.env.dev
+.env.prod
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres-data/
