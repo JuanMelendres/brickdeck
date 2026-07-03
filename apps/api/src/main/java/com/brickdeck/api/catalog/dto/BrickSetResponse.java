@@ -9,8 +9,11 @@ public record BrickSetResponse(
         Integer yearReleased,
         UUID themeId,
         String themeName,
+        Integer externalThemeId,
         Integer numberOfParts,
         String imageUrl,
-        String source
+        String externalUrl,
+        String source,
+        String cacheStatus
 ) {
 }

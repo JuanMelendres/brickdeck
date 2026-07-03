@@ -2,13 +2,12 @@ package com.brickdeck.api.catalog.controller;
 
 import com.brickdeck.api.catalog.dto.BrickSetResponse;
 import com.brickdeck.api.catalog.service.BrickSetService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/catalog/sets")
+@RequestMapping("/api/v1/sets")
 public class BrickSetController {
 
     private final BrickSetService brickSetService;
@@ -17,8 +16,13 @@ public class BrickSetController {
         this.brickSetService = brickSetService;
     }
 
-    @GetMapping("/{externalSetNumber}")
-    public BrickSetResponse getBySetNumber(@PathVariable String externalSetNumber) {
-        return brickSetService.getByExternalSetNumber(externalSetNumber);
+    @GetMapping
+    public List<BrickSetResponse> findAll() {
+        return brickSetService.findAll();
+    }
+
+    @GetMapping("/by-number/{setNumber}")
+    public BrickSetResponse findOrImportBySetNumber(@PathVariable String setNumber) {
+        return brickSetService.findOrImportBySetNumber(setNumber);
     }
 }
