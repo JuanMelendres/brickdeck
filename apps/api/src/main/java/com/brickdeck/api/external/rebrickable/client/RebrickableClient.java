@@ -2,6 +2,7 @@ package com.brickdeck.api.external.rebrickable.client;
 
 import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetResponse;
+import com.brickdeck.api.external.rebrickable.dto.RebrickableThemeResponse;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -21,6 +22,14 @@ public class RebrickableClient {
                 .uri("/lego/sets/{setNumber}/", setNumber)
                 .retrieve()
                 .body(RebrickableSetResponse.class);
+    }
+
+    public RebrickableThemeResponse getThemeById(Integer themeId) {
+        return rebrickableRestClient
+                .get()
+                .uri("/lego/themes/{themeId}/", themeId)
+                .retrieve()
+                .body(RebrickableThemeResponse.class);
     }
 
     public RebrickablePageResponse<RebrickableSetResponse> searchSets(String search, int page, int pageSize) {
