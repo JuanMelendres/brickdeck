@@ -52,6 +52,7 @@ public class BrickSetService {
                 .orElseThrow(() -> new ResourceNotFoundException("Set not found: " + setNumber));
     }
 
+    @Deprecated // TODO task-5: remove once BrickSetController calls findBySetNumber
     @Transactional
     public BrickSetResponse findOrImportBySetNumber(String setNumber) {
         return brickSetRepository.findByExternalSetNumber(setNumber)
@@ -61,12 +62,12 @@ public class BrickSetService {
 
     @Transactional
     public ImportResult importSet(String setNumber) {
-        BrickSet brickSet = brickSetRepository.findByExternalSetNumber(setNumber)
-                .orElseGet(BrickSet::new);
-        boolean created = brickSet.getId() == null;
-
         RebrickableSetResponse external = fetchExternalSet(setNumber);
         Theme theme = themeService.resolveByExternalId(external.themeId());
+
+        BrickSet brickSet = brickSetRepository.findByExternalSetNumber(external.setNum())
+                .orElseGet(BrickSet::new);
+        boolean created = brickSet.getId() == null;
 
         brickSet.setExternalSetNumber(external.setNum());
         brickSet.setName(external.name());
