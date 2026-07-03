@@ -199,8 +199,6 @@ class BrickSetServiceTest {
 
     @Test
     void importSetMapsRebrickableNotFoundToResourceNotFound() {
-        when(brickSetRepository.findByExternalSetNumber("99999-1"))
-                .thenReturn(Optional.empty());
         when(rebrickableClient.getSetByNumber("99999-1"))
                 .thenThrow(HttpClientErrorException.create(
                         HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, null, null));
