@@ -52,14 +52,6 @@ public class BrickSetService {
                 .orElseThrow(() -> new ResourceNotFoundException("Set not found: " + setNumber));
     }
 
-    @Deprecated // TODO task-5: remove once BrickSetController calls findBySetNumber
-    @Transactional
-    public BrickSetResponse findOrImportBySetNumber(String setNumber) {
-        return brickSetRepository.findByExternalSetNumber(setNumber)
-                .map(brickSet -> toResponse(brickSet, STATUS_LOCAL_CACHE_HIT))
-                .orElseGet(() -> importSet(setNumber).body());
-    }
-
     @Transactional
     public ImportResult importSet(String setNumber) {
         RebrickableSetResponse external = fetchExternalSet(setNumber);
