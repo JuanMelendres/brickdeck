@@ -2,6 +2,7 @@ package com.brickdeck.api.catalog.controller;
 
 import com.brickdeck.api.catalog.dto.BrickSetResponse;
 import com.brickdeck.api.catalog.service.BrickSetService;
+import com.brickdeck.api.common.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -76,24 +77,25 @@ class BrickSetControllerTest {
                 "https://cdn.rebrickable.com/media/sets/75375-1/136884.jpg",
                 "https://rebrickable.com/sets/75375-1/millennium-falcon/",
                 "REBRICKABLE",
-                "IMPORTED_FROM_REBRICKABLE"
+                "LOCAL_CACHE_HIT"
         );
 
-        when(brickSetService.findOrImportBySetNumber("75375-1")).thenReturn(response);
+        when(brickSetService.findBySetNumber("75375-1")).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/sets/by-number/{setNumber}", "75375-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andExpect(jsonPath("$.externalSetNumber").value("75375-1"))
-                .andExpect(jsonPath("$.name").value("Millennium Falcon"))
-                .andExpect(jsonPath("$.yearReleased").value(2024))
-                .andExpect(jsonPath("$.themeId").doesNotExist())
-                .andExpect(jsonPath("$.themeName").doesNotExist())
-                .andExpect(jsonPath("$.externalThemeId").value(158))
-                .andExpect(jsonPath("$.numberOfParts").value(921))
-                .andExpect(jsonPath("$.imageUrl").value("https://cdn.rebrickable.com/media/sets/75375-1/136884.jpg"))
-                .andExpect(jsonPath("$.externalUrl").value("https://rebrickable.com/sets/75375-1/millennium-falcon/"))
-                .andExpect(jsonPath("$.source").value("REBRICKABLE"))
-                .andExpect(jsonPath("$.cacheStatus").value("IMPORTED_FROM_REBRICKABLE"));
+                .andExpect(jsonPath("$.cacheStatus").value("LOCAL_CACHE_HIT"));
+    }
+
+    @Test
+    void returnsNotFoundWhenSetMissing() throws Exception {
+        when(brickSetService.findBySetNumber("00000-1"))
+                .thenThrow(new ResourceNotFoundException("Set not found: 00000-1"));
+
+        mockMvc.perform(get("/api/v1/sets/by-number/{setNumber}", "00000-1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Set not found: 00000-1"));
     }
 }

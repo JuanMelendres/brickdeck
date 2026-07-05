@@ -22,7 +22,7 @@ public class BrickSetController {
     }
 
     @GetMapping("/by-number/{setNumber}")
-    public BrickSetResponse findOrImportBySetNumber(@PathVariable String setNumber) {
-        return brickSetService.findOrImportBySetNumber(setNumber);
+    public BrickSetResponse findBySetNumber(@PathVariable String setNumber) {
+        return brickSetService.findBySetNumber(setNumber);
     }
 }
