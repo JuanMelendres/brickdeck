@@ -1,12 +1,14 @@
 package com.brickdeck.api.catalog.service;
 
 import com.brickdeck.api.catalog.dto.InventoryImportResult;
+import com.brickdeck.api.catalog.dto.SetPartResponse;
 import com.brickdeck.api.catalog.entity.BrickSet;
 import com.brickdeck.api.catalog.entity.Color;
 import com.brickdeck.api.catalog.entity.Part;
 import com.brickdeck.api.catalog.entity.SetPart;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
 import com.brickdeck.api.catalog.repository.SetPartRepository;
+import com.brickdeck.api.common.PageResponse;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableColorResponse;
@@ -19,6 +21,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -176,5 +182,49 @@ class SetInventoryServiceTest {
                 .hasMessageContaining("00000-1");
 
         verify(rebrickableClient, never()).getSetParts(anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    void findInventoryMapsLinesToPageResponse() {
+        BrickSet set = localSet("75375-1");
+
+        Color color = new Color();
+        color.setExternalId(4);
+        color.setName("Red");
+        color.setRgb("C91A09");
+
+        Part part = new Part();
+        part.setExternalPartNumber("3001");
+        part.setName("Brick 2 x 4");
+        part.setImageUrl("https://cdn.rebrickable.com/media/parts/3001.jpg");
+
+        UUID lineId = UUID.randomUUID();
+        SetPart line = new SetPart();
+        line.setId(lineId);
+        line.setBrickSet(set);
+        line.setPart(part);
+        line.setColor(color);
+        line.setQuantity(6);
+        line.setSpare(false);
+        line.setExternalElementId("300121");
+
+        Pageable pageable = PageRequest.of(0, 50);
+        when(setPartRepository.findByBrickSet_ExternalSetNumber("75375-1", pageable))
+                .thenReturn(new PageImpl<>(List.of(line), pageable, 1));
+
+        PageResponse<SetPartResponse> page = setInventoryService.findInventory("75375-1", pageable);
+
+        assertThat(page.totalElements()).isEqualTo(1);
+        assertThat(page.content()).hasSize(1);
+        SetPartResponse response = page.content().get(0);
+        assertThat(response.id()).isEqualTo(lineId);
+        assertThat(response.setNumber()).isEqualTo("75375-1");
+        assertThat(response.partNumber()).isEqualTo("3001");
+        assertThat(response.partName()).isEqualTo("Brick 2 x 4");
+        assertThat(response.colorExternalId()).isEqualTo(4);
+        assertThat(response.colorName()).isEqualTo("Red");
+        assertThat(response.quantity()).isEqualTo(6);
+        assertThat(response.spare()).isFalse();
+        assertThat(response.elementId()).isEqualTo("300121");
     }
 }
