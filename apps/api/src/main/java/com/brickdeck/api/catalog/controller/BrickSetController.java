@@ -3,9 +3,10 @@ package com.brickdeck.api.catalog.controller;
 import com.brickdeck.api.catalog.dto.BrickSetResponse;
 import com.brickdeck.api.catalog.service.BrickSetService;
 import com.brickdeck.api.common.PageResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/sets")
@@ -18,8 +19,10 @@ public class BrickSetController {
     }
 
     @GetMapping
-    public List<BrickSetResponse> findAll() {
-        return brickSetService.findAll();
+    public PageResponse<BrickSetResponse> findAll(
+            @PageableDefault(size = 20, sort = "externalSetNumber", direction = Sort.Direction.ASC)
+            Pageable pageable) {
+        return brickSetService.findAll(pageable);
     }
 
     @GetMapping("/by-number/{setNumber}")
