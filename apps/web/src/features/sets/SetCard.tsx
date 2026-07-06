@@ -16,7 +16,7 @@ export function SetCard({ set }: { set: BrickSetResponse }) {
         <CardMedia
           component="img"
           image={set.imageUrl}
-          alt={set.name}
+          alt={set.name ?? ""}
           sx={{ height: 160, objectFit: "contain", bgcolor: "grey.100", p: 1 }}
         />
       ) : null}
@@ -24,7 +24,7 @@ export function SetCard({ set }: { set: BrickSetResponse }) {
         <Typography variant="subtitle1" component="h3" gutterBottom>
           <MuiLink
             component={Link}
-            href={`/sets/${encodeURIComponent(set.externalSetNumber)}`}
+            href={`/sets/${encodeURIComponent(set.externalSetNumber ?? "")}`}
             underline="hover"
             color="inherit"
           >

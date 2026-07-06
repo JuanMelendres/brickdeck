@@ -28,7 +28,7 @@ export function SetDetail({ set }: { set: BrickSetResponse }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={set.imageUrl}
-          alt={set.name}
+          alt={set.name ?? ""}
           style={{ width: 200, height: "auto", objectFit: "contain" }}
         />
       ) : null}
@@ -36,7 +36,7 @@ export function SetDetail({ set }: { set: BrickSetResponse }) {
         <Typography variant="h4" component="h1">
           {set.name}
         </Typography>
-        <Fact label="Set number" value={set.externalSetNumber} />
+        <Fact label="Set number" value={set.externalSetNumber ?? "—"} />
         {set.yearReleased ? (
           <Fact label="Year" value={String(set.yearReleased)} />
         ) : null}

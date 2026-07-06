@@ -38,6 +38,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 
 ## Recently Worked On
 
+- OpenAPI-generated frontend types: `openapi-typescript` → `src/lib/types/schema.d.ts` (from `/v3/api-docs`); `lib/types/api.ts` now derives `BrickSetResponse`/`SetPartResponse`/`InventoryImportResult` from the schema (via `Nullable<T>` — DTOs have no OpenAPI nullability metadata but Jackson emits nulls). `PageResponse<T>` stays hand-written (OpenAPI can't express the generic). `npm run gen:api` refreshes against the running API.
 - Frontend set-detail + parts-inventory slice (`/sets/[setNumber]`, import button) — TDD (32 tests), typecheck/lint/build green
 - Frontend scaffold + set search page (`apps/web`, MUI/Next 16) — completes Phase 1; TDD, typecheck/lint/build green
 - OpenAPI/Swagger (`springdoc` 2.8.6 + `OpenApiConfig`) — pre-frontend API contract; TDD via `OpenApiDocsTest`
@@ -64,6 +65,6 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 
 ## Immediate Next Steps
 
-1. Generate TS types from OpenAPI spec (`/v3/api-docs`) to replace hand-written `lib/types/api.ts`.
-2. Add Postman collection under `docs/postman` for the catalog API (can derive from OpenAPI spec).
+1. Add Postman collection under `docs/postman` for the catalog API (can derive from OpenAPI spec).
+2. Consider marking backend DTO fields required/nullable so generated types drop the `Nullable<T>` workaround.
 3. Begin Phase 2 (User Collection): auth + add-set-to-collection.
