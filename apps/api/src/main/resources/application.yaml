@@ -42,3 +42,7 @@ management:
 rebrickable:
   base-url: ${REBRICKABLE_BASE_URL:https://rebrickable.com/api/v3}
   api-key: ${REBRICKABLE_API_KEY:}
+
+brickdeck:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

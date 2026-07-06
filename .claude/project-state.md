@@ -29,11 +29,13 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 - Set inventory slice 3: `SetInventoryService.importInventory(setNumber)` — set must exist locally (option A), fetch-all pages, upsert Color/Part reference data (`ColorService`/`PartService`) + `set_parts` lines idempotently (find-by set/part/color/spare before insert); `InventoryImportResult` summary; `SetPartRepository.findByBrickSetAndPartAndColorAndSpare`
 - Set inventory slice 4 (complete): `POST /api/v1/catalog/sets/{setNumber}/inventory/import` (200 + `InventoryImportResult`) and `GET /api/v1/sets/{setNumber}/parts` → `PageResponse<SetPartResponse>` (`@PageableDefault size=50 sort=id`); `SetInventoryService.findInventory` + `SetPartResponse` DTO. **Phase 1 "view a set's parts inventory" met.**
 - Set-number normalization: bare number (`42232`) → default variant (`42232-1`) on exact lookup/import
+- Global CORS config: `CorsConfig` (`WebMvcConfigurer`) + `CorsProperties` (`brickdeck.cors.allowed-origins`, env `CORS_ALLOWED_ORIGINS`, default `http://localhost:3000`) mapping `/api/**`; `allowCredentials=false` (no auth until Phase 2). Pre-frontend prerequisite.
 - Design + implementation plan docs for set import
 - Per-repo napkin runbook
 
 ## Recently Worked On
 
+- Global CORS config (`CorsConfig`/`CorsProperties`) — pre-frontend prerequisite; TDD via `CorsConfigTest` preflight slice
 - Set inventory slice 4: import + read endpoints (completes set inventory feature + Phase 1 core criterion)
 - Set inventory slice 3: idempotent import service (ColorService/PartService/SetInventoryService)
 - Set inventory slice 2: Rebrickable set-parts fetch client + external DTOs
@@ -56,6 +58,6 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 
 ## Immediate Next Steps
 
-1. Scaffold `apps/web` (Next.js) — catalog read API now stable (search, set detail, parts inventory).
+1. Scaffold `apps/web` (Next.js) — catalog read API now stable (search, set detail, parts inventory); CORS in place for `http://localhost:3000`.
 2. Add Postman collection under `docs/postman` for the catalog API.
-3. Consider Swagger/OpenAPI + CORS before frontend binds.
+3. Consider Swagger/OpenAPI before frontend binds (CORS done).
