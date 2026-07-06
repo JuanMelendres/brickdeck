@@ -25,12 +25,14 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 - `PageResponse<T>` envelope in `common` (0-indexed, `PageResponse.of(...)` factory)
 - `GET /api/v1/sets` paginated: `PageResponse<BrickSetResponse>` via `Pageable` + `@PageableDefault(size=20, sort="externalSetNumber")`
 - Set inventory schema foundation (slice 1): `colors`, `parts`, `set_parts` tables (V4) + `Color`/`Part`/`SetPart` entities + repositories; normalized reference model, `set_parts` unique on `(set_id, part_id, color_id, is_spare)`
+- Set inventory slice 2: Rebrickable `getSetParts(setNumber, page, pageSize)` client method (`/lego/sets/{num}/parts/`, paginated) + external DTOs `RebrickableSetPartResponse`/`RebrickablePartResponse`/`RebrickableColorResponse`
 - Set-number normalization: bare number (`42232`) → default variant (`42232-1`) on exact lookup/import
 - Design + implementation plan docs for set import
 - Per-repo napkin runbook
 
 ## Recently Worked On
 
+- Set inventory slice 2: Rebrickable set-parts fetch client + external DTOs
 - Set inventory schema foundation: colors/parts/set_parts tables + entities + repos (slice 1 of set inventory)
 - Paginated `GET /api/v1/sets` with `PageResponse` + `@PageableDefault`
 - Set search endpoint + `PageResponse<T>` + set-number suffix normalization
@@ -50,8 +52,7 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 
 ## Immediate Next Steps
 
-1. Set inventory slice 2: Rebrickable client `getSetParts(setNumber, page)` + external DTOs (`/lego/sets/{num}/parts/`, paginated).
-2. Set inventory slice 3: inventory import service — find-or-import, upsert color/part reference data + set_parts (idempotent).
-3. Set inventory slice 4: read endpoint `GET /api/v1/sets/{setNumber}/parts` → `PageResponse<SetPartResponse>`.
-4. Scaffold `apps/web` (Next.js) once catalog read API is stable.
-5. Add Postman collection under `docs/postman` for the catalog API.
+1. Set inventory slice 3: inventory import service — find-or-import, upsert color/part reference data + set_parts (idempotent).
+2. Set inventory slice 4: read endpoint `GET /api/v1/sets/{setNumber}/parts` → `PageResponse<SetPartResponse>`.
+3. Scaffold `apps/web` (Next.js) once catalog read API is stable.
+4. Add Postman collection under `docs/postman` for the catalog API.
