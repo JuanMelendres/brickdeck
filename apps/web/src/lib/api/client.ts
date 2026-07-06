@@ -39,13 +39,10 @@ async function extractMessage(response: Response): Promise<string> {
   return `Request failed with status ${response.status}`;
 }
 
-export async function apiGet<T>(
-  path: string,
-  params?: QueryParams,
-): Promise<T> {
-  const response = await fetch(buildUrl(path, params), {
-    method: "GET",
-    headers: { Accept: "application/json" },
+async function request<T>(url: string, init: RequestInit): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
+    headers: { Accept: "application/json", ...init.headers },
   });
 
   if (!response.ok) {
@@ -53,4 +50,17 @@ export async function apiGet<T>(
   }
 
   return (await response.json()) as T;
+}
+
+export function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
+  return request<T>(buildUrl(path, params), { method: "GET" });
+}
+
+export function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(buildUrl(path), {
+    method: "POST",
+    headers:
+      body === undefined ? {} : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 }

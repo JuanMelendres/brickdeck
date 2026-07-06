@@ -31,13 +31,15 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 - Set-number normalization: bare number (`42232`) → default variant (`42232-1`) on exact lookup/import
 - Global CORS config: `CorsConfig` (`WebMvcConfigurer`) + `CorsProperties` (`brickdeck.cors.allowed-origins`, env `CORS_ALLOWED_ORIGINS`, default `http://localhost:3000`) mapping `/api/**`; `allowCredentials=false` (no auth until Phase 2). Pre-frontend prerequisite.
 - OpenAPI/Swagger: `springdoc-openapi-starter-webmvc-ui` 2.8.6 + `OpenApiConfig` (`OpenAPI` bean, title "BrickDeck Catalog API", version v1). Spec at `/v3/api-docs`, UI at `/swagger-ui/index.html`. Pre-frontend contract source (TS type generation).
-- Frontend scaffold (`apps/web`): Next.js 16 (App Router, src dir) + React 19 + TS strict + **MUI v9/Emotion** (NOT Tailwind/shadcn — see memory) + TanStack Query + RHF+Zod + Vitest/RTL. Typed `apiGet` client (`NEXT_PUBLIC_API_BASE_URL`), `searchSets`, `useSetSearch` hook, `SetSearchBar`/`SetResults`/`SetCard`, `/sets` search page with loading/error/empty/pagination states. MUI SSR via `AppRouterCacheProvider` (`v16-appRouter`) + `ThemeProvider`/`QueryProvider`. 14 tests. TDD throughout.
+- Frontend scaffold (`apps/web`): Next.js 16 (App Router, src dir) + React 19 + TS strict + **MUI v9/Emotion** (NOT Tailwind/shadcn — see memory) + TanStack Query + RHF+Zod + Vitest/RTL. Typed `apiGet` client (`NEXT_PUBLIC_API_BASE_URL`), `searchSets`, `useSetSearch` hook, `SetSearchBar`/`SetResults`/`SetCard`, `/sets` search page with loading/error/empty/pagination states. MUI SSR via `AppRouterCacheProvider` (`v16-appRouter`) + `ThemeProvider`/`QueryProvider`. TDD throughout.
+- Frontend set-detail slice (`/sets/[setNumber]`): `apiPost` + `getSetByNumber`/`getSetParts`/`importSetInventory`; `useSetDetail`/`useSetParts` queries + `useImportInventory` mutation (invalidates `["sets","parts",setNumber]` prefix on success); `SetDetail` (set info) + `PartsInventory` (MUI table, loading/error/empty states, prev/next pagination, "Import inventory" button when empty). `SetCard` name links to detail page. 32 tests total (18 new).
 - Design + implementation plan docs for set import
 - Per-repo napkin runbook
 
 ## Recently Worked On
 
-- Frontend scaffold + set search page (`apps/web`, MUI/Next 16) — completes Phase 1; TDD (14 tests), typecheck/lint/build green
+- Frontend set-detail + parts-inventory slice (`/sets/[setNumber]`, import button) — TDD (32 tests), typecheck/lint/build green
+- Frontend scaffold + set search page (`apps/web`, MUI/Next 16) — completes Phase 1; TDD, typecheck/lint/build green
 - OpenAPI/Swagger (`springdoc` 2.8.6 + `OpenApiConfig`) — pre-frontend API contract; TDD via `OpenApiDocsTest`
 - Global CORS config (`CorsConfig`/`CorsProperties`) — pre-frontend prerequisite; TDD via `CorsConfigTest` preflight slice
 - Set inventory slice 4: import + read endpoints (completes set inventory feature + Phase 1 core criterion)
@@ -62,7 +64,6 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 
 ## Immediate Next Steps
 
-1. Frontend set-detail page + parts-inventory table (`/sets/[setNumber]`) consuming `GET /api/v1/sets/{setNumber}/parts`.
-2. Generate TS types from OpenAPI spec (`/v3/api-docs`) to replace hand-written `lib/types/api.ts`.
-3. Add Postman collection under `docs/postman` for the catalog API (can derive from OpenAPI spec).
-4. Begin Phase 2 (User Collection): auth + add-set-to-collection.
+1. Generate TS types from OpenAPI spec (`/v3/api-docs`) to replace hand-written `lib/types/api.ts`.
+2. Add Postman collection under `docs/postman` for the catalog API (can derive from OpenAPI spec).
+3. Begin Phase 2 (User Collection): auth + add-set-to-collection.

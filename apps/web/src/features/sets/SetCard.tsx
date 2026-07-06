@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -21,7 +22,14 @@ export function SetCard({ set }: { set: BrickSetResponse }) {
       ) : null}
       <CardContent>
         <Typography variant="subtitle1" component="h3" gutterBottom>
-          {set.name}
+          <MuiLink
+            component={Link}
+            href={`/sets/${encodeURIComponent(set.externalSetNumber)}`}
+            underline="hover"
+            color="inherit"
+          >
+            {set.name}
+          </MuiLink>
         </Typography>
         <Stack spacing={0.5}>
           <Typography variant="body2" color="text.secondary">

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, apiGet } from "./client";
+import { ApiError, apiGet, apiPost } from "./client";
 
 const jsonResponse = (body: unknown, status = 200): Response =>
   new Response(JSON.stringify(body), {
@@ -47,5 +47,36 @@ describe("apiGet", () => {
     await expect(apiGet("/api/v1/sets/by-number/x")).rejects.toBeInstanceOf(
       ApiError,
     );
+  });
+});
+
+describe("apiPost", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("POSTs to the base URL + path and returns parsed JSON", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({ setNumber: "75257-1", linesProcessed: 42 }));
+
+    const result = await apiPost<{ setNumber: string; linesProcessed: number }>(
+      "/api/v1/catalog/sets/75257-1/inventory/import",
+    );
+
+    expect(result).toEqual({ setNumber: "75257-1", linesProcessed: 42 });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(
+      "http://localhost:8080/api/v1/catalog/sets/75257-1/inventory/import",
+    );
+    expect((init as RequestInit).method).toBe("POST");
+  });
+
+  it("throws ApiError with backend message on non-2xx", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ message: "Set not imported" }, 404),
+    );
+
+    await expect(
+      apiPost("/api/v1/catalog/sets/x/inventory/import"),
+    ).rejects.toMatchObject({ status: 404, message: "Set not imported" });
   });
 });

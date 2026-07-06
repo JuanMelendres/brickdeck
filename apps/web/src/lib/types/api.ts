@@ -33,3 +33,24 @@ export interface BrickSetResponse {
   source: string | null;
   cacheStatus: CacheStatus;
 }
+
+/** Mirrors SetPartResponse.java. */
+export interface SetPartResponse {
+  id: string;
+  setNumber: string;
+  partNumber: string;
+  partName: string;
+  partImageUrl: string | null;
+  colorExternalId: number | null;
+  colorName: string | null;
+  colorRgb: string | null;
+  quantity: number;
+  spare: boolean;
+  elementId: string | null;
+}
+
+/** Mirrors InventoryImportResult.java. */
+export interface InventoryImportResult {
+  setNumber: string;
+  linesProcessed: number;
+}
