@@ -19,8 +19,8 @@ Status: In Progress
 - Rebrickable API client — Done
 - Theme upsert + resolution — Done
 - Set import (upsert) + read-only lookup — Done
+- Catalog search endpoint (Rebrickable-backed, `PageResponse`) — Done
 - Set inventory (parts, colors) import + read — Next
-- Catalog search endpoint — Next
 - Scaffold Next.js frontend (`apps/web`) — Not Started
 
 Success criteria: user can search a LEGO set and view its parts inventory.

@@ -5,8 +5,10 @@ import com.brickdeck.api.catalog.dto.ImportResult;
 import com.brickdeck.api.catalog.entity.BrickSet;
 import com.brickdeck.api.catalog.entity.Theme;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
+import com.brickdeck.api.common.PageResponse;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
+import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -208,5 +210,82 @@ class BrickSetServiceTest {
                 .hasMessageContaining("99999-1");
 
         verify(brickSetRepository, never()).save(any(BrickSet.class));
+    }
+
+    @Test
+    void searchMapsRebrickableResultsToPageResponse() {
+        when(rebrickableClient.searchSets("falcon", 1, 20))
+                .thenReturn(new RebrickablePageResponse<>(1, null, null, List.of(falconExternal())));
+
+        PageResponse<BrickSetResponse> page = brickSetService.search("falcon", 0, 20);
+
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().get(0).id()).isNull();
+        assertThat(page.content().get(0).externalSetNumber()).isEqualTo("75375-1");
+        assertThat(page.content().get(0).externalThemeId()).isEqualTo(158);
+        assertThat(page.content().get(0).cacheStatus()).isEqualTo("EXTERNAL_SEARCH_RESULT");
+        assertThat(page.page()).isZero();
+        assertThat(page.size()).isEqualTo(20);
+        assertThat(page.totalElements()).isEqualTo(1);
+        assertThat(page.totalPages()).isEqualTo(1);
+        assertThat(page.first()).isTrue();
+        assertThat(page.last()).isTrue();
+    }
+
+    @Test
+    void searchReturnsEmptyPageWhenNoResults() {
+        when(rebrickableClient.searchSets("zzz", 1, 20))
+                .thenReturn(new RebrickablePageResponse<>(0, null, null, List.of()));
+
+        PageResponse<BrickSetResponse> page = brickSetService.search("zzz", 0, 20);
+
+        assertThat(page.content()).isEmpty();
+        assertThat(page.totalElements()).isZero();
+        assertThat(page.totalPages()).isZero();
+        assertThat(page.first()).isTrue();
+        assertThat(page.last()).isTrue();
+    }
+
+    @Test
+    void searchConvertsZeroBasedPageToRebrickableOneBased() {
+        when(rebrickableClient.searchSets("falcon", 3, 10))
+                .thenReturn(new RebrickablePageResponse<>(25, null, null, List.of(falconExternal())));
+
+        PageResponse<BrickSetResponse> page = brickSetService.search("falcon", 2, 10);
+
+        assertThat(page.page()).isEqualTo(2);
+        assertThat(page.totalPages()).isEqualTo(3);
+        assertThat(page.first()).isFalse();
+        assertThat(page.last()).isTrue();
+        verify(rebrickableClient).searchSets("falcon", 3, 10);
+    }
+
+    @Test
+    void importSetAppendsDefaultVariantWhenSuffixMissing() {
+        when(brickSetRepository.findByExternalSetNumber("75375-1")).thenReturn(Optional.empty());
+        when(rebrickableClient.getSetByNumber("75375-1")).thenReturn(falconExternal());
+        when(themeService.resolveByExternalId(158)).thenReturn(null);
+        when(brickSetRepository.save(any(BrickSet.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ImportResult result = brickSetService.importSet("75375");
+
+        verify(rebrickableClient).getSetByNumber("75375-1");
+        assertThat(result.body().externalSetNumber()).isEqualTo("75375-1");
+    }
+
+    @Test
+    void findBySetNumberNormalizesMissingSuffix() {
+        UUID setId = UUID.randomUUID();
+        BrickSet set = new BrickSet();
+        set.setId(setId);
+        set.setExternalSetNumber("75375-1");
+        set.setSource("REBRICKABLE");
+
+        when(brickSetRepository.findByExternalSetNumber("75375-1")).thenReturn(Optional.of(set));
+
+        BrickSetResponse response = brickSetService.findBySetNumber("75375");
+
+        assertThat(response.id()).isEqualTo(setId);
+        assertThat(response.externalSetNumber()).isEqualTo("75375-1");
     }
 }
