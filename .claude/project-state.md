@@ -21,11 +21,15 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 - Read-only set/theme lookup endpoints (`/api/v1/sets`, find-or-import from Rebrickable)
 - `BrickSetResponse` with `externalThemeId`, `externalUrl`, `cacheStatus`
 - Catalog controllers: BrickSet, BrickSetLookup, BrickSetImport, Theme
+- Set search endpoint (`GET /api/v1/sets/search?q=&page=&size=`) → Rebrickable fuzzy search, `PageResponse<BrickSetResponse>`, 0-indexed (converts to Rebrickable 1-indexed), `cacheStatus=EXTERNAL_SEARCH_RESULT`
+- `PageResponse<T>` envelope in `common` (0-indexed, `PageResponse.of(...)` factory)
+- Set-number normalization: bare number (`42232`) → default variant (`42232-1`) on exact lookup/import
 - Design + implementation plan docs for set import
 - Per-repo napkin runbook
 
 ## Recently Worked On
 
+- Set search endpoint + `PageResponse<T>` + set-number suffix normalization
 - Connect/read timeouts on Rebrickable client (commit 3ded4c0)
 - Set import endpoint + read endpoint made read-only (61d3a75)
 - Set upsert keyed on canonical set number; deprecated shim marked (71de692)
@@ -42,7 +46,7 @@ Phase 1 (Catalog Foundation) in progress. Phase 0 (Foundation) complete. Backend
 
 ## Immediate Next Steps
 
-1. Complete Phase 1: set inventory (parts, colors) import + read; catalog search endpoint.
-2. Add `PageResponse<T>` + pagination when list endpoints grow.
+1. Complete Phase 1: set inventory (parts, colors) import + read.
+2. Apply `PageResponse<T>` + `@PageableDefault` to `GET /api/v1/sets` (currently a raw `List`).
 3. Scaffold `apps/web` (Next.js) once catalog read API is stable.
 4. Add Postman collection under `docs/postman` for the catalog API.

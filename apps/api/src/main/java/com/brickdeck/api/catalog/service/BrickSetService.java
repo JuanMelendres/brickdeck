@@ -5,8 +5,10 @@ import com.brickdeck.api.catalog.dto.ImportResult;
 import com.brickdeck.api.catalog.entity.BrickSet;
 import com.brickdeck.api.catalog.entity.Theme;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
+import com.brickdeck.api.common.PageResponse;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
+import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class BrickSetService {
     private static final String STATUS_LOCAL_CACHE_HIT = "LOCAL_CACHE_HIT";
     private static final String STATUS_IMPORTED = "IMPORTED_FROM_REBRICKABLE";
     private static final String STATUS_REFRESHED = "REFRESHED_FROM_REBRICKABLE";
+    private static final String STATUS_EXTERNAL_SEARCH = "EXTERNAL_SEARCH_RESULT";
 
     private final BrickSetRepository brickSetRepository;
     private final RebrickableClient rebrickableClient;
@@ -47,14 +50,29 @@ public class BrickSetService {
 
     @Transactional(readOnly = true)
     public BrickSetResponse findBySetNumber(String setNumber) {
-        return brickSetRepository.findByExternalSetNumber(setNumber)
+        String normalized = SetNumbers.normalize(setNumber);
+        return brickSetRepository.findByExternalSetNumber(normalized)
                 .map(brickSet -> toResponse(brickSet, STATUS_LOCAL_CACHE_HIT))
-                .orElseThrow(() -> new ResourceNotFoundException("Set not found: " + setNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("Set not found: " + normalized));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<BrickSetResponse> search(String query, int page, int size) {
+        RebrickablePageResponse<RebrickableSetResponse> external =
+                rebrickableClient.searchSets(query, page + 1, size);
+
+        List<RebrickableSetResponse> results = external.results() != null ? external.results() : List.of();
+        List<BrickSetResponse> content = results.stream()
+                .map(this::toSearchResponse)
+                .toList();
+
+        long totalElements = external.count() != null ? external.count() : content.size();
+        return PageResponse.of(content, page, size, totalElements);
     }
 
     @Transactional
     public ImportResult importSet(String setNumber) {
-        RebrickableSetResponse external = fetchExternalSet(setNumber);
+        RebrickableSetResponse external = fetchExternalSet(SetNumbers.normalize(setNumber));
         Theme theme = themeService.resolveByExternalId(external.themeId());
 
         BrickSet brickSet = brickSetRepository.findByExternalSetNumber(external.setNum())
@@ -99,6 +117,23 @@ public class BrickSetService {
                 brickSet.getExternalUrl(),
                 brickSet.getSource(),
                 cacheStatus
+        );
+    }
+
+    private BrickSetResponse toSearchResponse(RebrickableSetResponse external) {
+        return new BrickSetResponse(
+                null,
+                external.setNum(),
+                external.name(),
+                external.year(),
+                null,
+                null,
+                external.themeId(),
+                external.numParts(),
+                external.setImgUrl(),
+                external.setUrl(),
+                SOURCE_REBRICKABLE,
+                STATUS_EXTERNAL_SEARCH
         );
     }
 

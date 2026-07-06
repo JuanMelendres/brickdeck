@@ -2,6 +2,7 @@ package com.brickdeck.api.catalog.controller;
 
 import com.brickdeck.api.catalog.dto.BrickSetResponse;
 import com.brickdeck.api.catalog.service.BrickSetService;
+import com.brickdeck.api.common.PageResponse;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +98,43 @@ class BrickSetControllerTest {
         mockMvc.perform(get("/api/v1/sets/by-number/{setNumber}", "00000-1"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Set not found: 00000-1"));
+    }
+
+    @Test
+    void searchReturnsPageResponseWithOk() throws Exception {
+        BrickSetResponse response = new BrickSetResponse(
+                null,
+                "75375-1",
+                "Millennium Falcon",
+                2024,
+                null,
+                null,
+                158,
+                921,
+                "https://cdn.rebrickable.com/media/sets/75375-1/136884.jpg",
+                "https://rebrickable.com/sets/75375-1/millennium-falcon/",
+                "REBRICKABLE",
+                "EXTERNAL_SEARCH_RESULT"
+        );
+
+        when(brickSetService.search("falcon", 0, 20))
+                .thenReturn(PageResponse.of(List.of(response), 0, 20, 1));
+
+        mockMvc.perform(get("/api/v1/sets/search").param("q", "falcon"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].externalSetNumber").value("75375-1"))
+                .andExpect(jsonPath("$.content[0].cacheStatus").value("EXTERNAL_SEARCH_RESULT"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(true));
+    }
+
+    @Test
+    void searchWithMissingQueryReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/v1/sets/search"))
+                .andExpect(status().isBadRequest());
     }
 }
