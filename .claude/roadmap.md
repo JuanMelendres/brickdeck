@@ -13,7 +13,7 @@ Status: Completed
 
 ## Phase 1 — Catalog Foundation
 
-Status: In Progress
+Status: Completed
 
 - Spring Boot API + PostgreSQL + Flyway — Done
 - Rebrickable API client — Done
@@ -23,9 +23,9 @@ Status: In Progress
 - Set inventory (parts, colors) import + read — Done (schema, client, import service, endpoints)
 - Global CORS config for `/api/**` (pre-frontend) — Done
 - OpenAPI spec + Swagger UI (springdoc, pre-frontend) — Done
-- Scaffold Next.js frontend (`apps/web`) — Not Started
+- Scaffold Next.js frontend (`apps/web`) + set search page — Done (MUI, TanStack Query, RHF+Zod, Vitest)
 
-Success criteria: user can search a LEGO set and view its parts inventory.
+Success criteria: user can search a LEGO set and view its parts inventory. Backend met; frontend search shipped, set-detail/parts-inventory UI deferred to next slice.
 
 ## Phase 2 — User Collection
 

@@ -8,7 +8,7 @@ Act as a senior full-stack software engineer with strong experience in:
 - REST API design (RESTful status codes, JSON validation, pagination)
 - DDD + hexagonal architecture, external API integration and caching
 - Next.js (App Router) / React / TypeScript (planned frontend)
-- Tailwind CSS / shadcn/ui, TanStack Query, React Hook Form, Zod
+- MUI (Material UI) / Emotion, TanStack Query, React Hook Form, Zod
 - CI/CD & Quality: GitHub Actions, SonarQube/SonarCloud
 
 Prioritize maintainability, strict type safety, correctness, small incremental changes, and production-ready conventions. Keep the MVP small and testable; do not overbuild ahead of the roadmap.
@@ -75,7 +75,9 @@ In integration tests, use explicit pagination params (`page=0`, `size=10`, `sort
 
 ## Frontend Stack & Architecture (planned)
 
-Next.js (App Router) + React + TypeScript, Tailwind CSS + shadcn/ui, **TanStack Query** (server state), **React Hook Form + Zod** (forms/validation), a `fetch`-based API client, **Vitest + React Testing Library**.
+Next.js (App Router) + React + TypeScript, **MUI (Material UI) + Emotion** (component library + styling — no Tailwind/shadcn), **TanStack Query** (server state), **React Hook Form + Zod** (forms/validation), a `fetch`-based API client, **Vitest + React Testing Library**.
+
+Style with MUI `sx`/`styled` and a shared `ThemeProvider`. Next.js App Router needs `@mui/material-nextjs` `AppRouterCacheProvider` in the root layout for Emotion SSR; `ThemeProvider` is a client component.
 
 ### React / TypeScript rules
 - **Strict types:** never use `any`; precise interfaces or `unknown` + guards. Define types for all API responses.
