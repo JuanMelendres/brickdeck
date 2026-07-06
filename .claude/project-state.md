@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend catalog slice done (Rebrickable client, theme + set import, read-only lookup, search, set inventory, CORS, OpenAPI). Frontend (`apps/web`) scaffolded with MUI + set search page. Next: Phase 2 (User Collection) or frontend set-detail/parts-inventory slice.
+Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done. Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2b add-set-to-collection, then frontend auth wiring.
 
 ## Completed
 
@@ -38,6 +38,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 
 ## Recently Worked On
 
+- Phase 2a auth foundation (backend): Spring Security + stateless JWT (jjwt 0.12.6), V5 `users` table + `User` entity/repo, `AuthService` (register/login, BCrypt), `JwtService`, `JwtAuthenticationFilter` (Bearer → SecurityContext, principal = `User`), `SecurityConfig` (stateless, permit auth+swagger+health, CORS source), `AuthController` (`POST /api/v1/auth/register` 201, `/login` 200, `GET /me`), `GlobalExceptionHandler` +409/+401/+400. Catalog `@WebMvcTest` slices now use `@AutoConfigureMockMvc(addFilters=false)`. 67 tests (JwtService, AuthService, AuthIntegration). Spec: `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`.
 - OpenAPI-generated frontend types: `openapi-typescript` → `src/lib/types/schema.d.ts` (from `/v3/api-docs`); `lib/types/api.ts` now derives `BrickSetResponse`/`SetPartResponse`/`InventoryImportResult` from the schema (via `Nullable<T>` — DTOs have no OpenAPI nullability metadata but Jackson emits nulls). `PageResponse<T>` stays hand-written (OpenAPI can't express the generic). `npm run gen:api` refreshes against the running API.
 - Frontend set-detail + parts-inventory slice (`/sets/[setNumber]`, import button) — TDD (32 tests), typecheck/lint/build green
 - Frontend scaffold + set search page (`apps/web`, MUI/Next 16) — completes Phase 1; TDD, typecheck/lint/build green
@@ -65,6 +66,6 @@ Phase 1 (Catalog Foundation) complete. Phase 0 (Foundation) complete. Backend ca
 
 ## Immediate Next Steps
 
-1. Add Postman collection under `docs/postman` for the catalog API (can derive from OpenAPI spec).
-2. Consider marking backend DTO fields required/nullable so generated types drop the `Nullable<T>` workaround.
-3. Begin Phase 2 (User Collection): auth + add-set-to-collection.
+1. Phase 2b: add-set-to-collection (`user_sets` table, `POST/GET /api/v1/collection/sets`, auth required, owner-scoped).
+2. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes.
+3. Add Postman collection under `docs/postman`; mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.

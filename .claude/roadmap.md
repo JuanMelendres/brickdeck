@@ -29,10 +29,14 @@ Success criteria: user can search a LEGO set and view its parts inventory. Backe
 
 ## Phase 2 — User Collection
 
-Status: Not Started
+Status: In Progress
 
-- Auth, add set to collection, set status, purchase price/date
-- Loose pieces manual inventory, quantity by part/color, storage location
+- Auth foundation (2a) — Done: JWT (stateless), users table, register/login/me, Spring Security
+- Add set to collection (2b), set status, purchase price/date — Not Started
+- Loose pieces manual inventory (2c), quantity by part/color, storage location — Not Started
+- Frontend login/register wiring — Not Started
+
+Decomposed into 2a (auth) → 2b (add-set) → 2c (loose pieces). Auth = JWT stateless (see `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`).
 
 ## Phase 3 — Missing Pieces Engine
 
