@@ -1,228 +1,166 @@
-# CLAUDE.md — BrickDeck Project Context
+# BrickDeck — Claude Project Context
 
-This file provides project context and working rules for Claude or any AI coding assistant contributing to BrickDeck.
+## Role
 
----
+Act as a senior full-stack software engineer with strong experience in:
+- Java 21 / Spring Boot 3 / Spring Data JPA
+- PostgreSQL / Flyway / Testcontainers
+- REST API design (RESTful status codes, JSON validation, pagination)
+- DDD + hexagonal architecture, external API integration and caching
+- Next.js (App Router) / React / TypeScript (planned frontend)
+- Tailwind CSS / shadcn/ui, TanStack Query, React Hook Form, Zod
+- CI/CD & Quality: GitHub Actions, SonarQube/SonarCloud
+
+Prioritize maintainability, strict type safety, correctness, small incremental changes, and production-ready conventions. Keep the MVP small and testable; do not overbuild ahead of the roadmap.
 
 ## Project Summary
 
 BrickDeck is a LEGO collection intelligence platform.
 
-It helps users:
+- **Backend:** A Spring Boot REST API (`apps/api`) that imports and caches LEGO catalog data (sets, themes, parts, colors) from Rebrickable, then powers collection, missing-piece, comparison, and recommendation features.
+- **Frontend:** A Next.js (App Router) app (`apps/web`) that consumes the REST API. **Not yet scaffolded.**
 
-- Organize LEGO sets and loose pieces
-- Import set and part data from external catalog APIs
-- Compare different versions of similar sets
-- Find missing pieces required to complete builds
-- Discover what sets or MOCs they can build with existing pieces
-- Track prices and deals
-- Eventually use AI to identify and classify LEGO pieces from photos
+Current phase: **Phase 1 — Catalog Foundation**. Product priority order and full roadmap live in `docs/ROADMAP.md`; architecture in `docs/ARCHITECTURE.md`. Build the backend/catalog stable before starting the frontend.
 
-The project is intended to start as a side project but should be designed with enough quality to become a commercial SaaS product later.
+## Backend Stack & Architecture
 
----
+### Stack
+Java 21, Spring Boot 3 (3.5.x), Maven Wrapper, PostgreSQL 16 (Docker Compose, `localhost:5433`), Flyway, Spring Data JPA, Hibernate, Bean Validation, Testcontainers, JUnit 5, Mockito, MockMvc.
 
-## Current Project Phase
+### Architecture
+DDD + hexagonal: keep core catalog logic separate from infrastructure. Keep external API clients isolated in `external.*` integration packages. Never expose entities or raw third-party responses — map to DTO records. Normalize external data into internal entities and cache locally.
 
-Current phase: **Phase 0 — Foundation**
+### Packages & Resources
+- Base package: `com.brickdeck.api`
+- Main packages: `catalog` (`controller`, `service`, `repository`, `entity`, `dto`), `external.rebrickable` (`client`, `config`, `dto`), `common`, `health`
+- API resources: `/api/v1/sets` (read + find-or-import), set import endpoint, theme endpoints, `/health`
 
-Primary goals:
+### Completed backend features
+- Java 21 Spring Boot API, PostgreSQL + Docker Compose, Flyway migrations (init, Rebrickable metadata, theme external_id unique)
+- Health endpoint
+- `GlobalExceptionHandler` (`@RestControllerAdvice`) + `ResourceNotFoundException` → 404 `{message}`
+- Rebrickable API client + config with connect/read timeouts
+- Theme fetch + resolution/upsert service
+- Set import (upsert) keyed on canonical set number; read-only lookup (find-or-import, cache-first)
+- `BrickSetResponse` with `externalThemeId`, `externalUrl`, `cacheStatus` (`LOCAL_CACHE_HIT` | `IMPORTED_FROM_REBRICKABLE`)
 
-- Define the product vision
-- Create the repository structure
-- Add base documentation
-- Configure local development
-- Decide the initial architecture
-- Start MVP implementation carefully
+## External API Rules (Rebrickable)
 
-Do not overbuild advanced features before the foundation is stable.
+- Rebrickable is the primary catalog source; keys via environment variables — never committed.
+- Keep connect/read timeouts on the client; add retries and respect rate limits.
+- Cache imported data locally. **Find-or-import is cache-first:** a local hit skips Rebrickable and skips saving.
+- Track external source and sync timestamp on imported data.
 
----
+## Response & Pagination Rules
 
-## Product Priorities
+GET-by-id / detail endpoints return the DTO record directly.
 
-Build in this order:
+When collection GET endpoints are added, return `PageResponse<T>`:
+```json
+{
+  "content": [],
+  "page": 0,
+  "size": 10,
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true
+}
+```
+Support `page`, `size`, `sort` with a safe default:
+```java
+@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC)
+```
+In integration tests, use explicit pagination params (`page=0`, `size=10`, `sort=id,asc`).
 
-1. Catalog search and set details
-2. Set inventory import
-3. User collection management
-4. Loose piece manual inventory
-5. Missing piece calculation
-6. Set comparison
-7. Build recommendations
-8. Price tracking
-9. AI-assisted classification
+## Frontend Stack & Architecture (planned)
 
-AI image recognition is important but should not be implemented before the catalog and inventory system are working.
+Next.js (App Router) + React + TypeScript, Tailwind CSS + shadcn/ui, **TanStack Query** (server state), **React Hook Form + Zod** (forms/validation), a `fetch`-based API client, **Vitest + React Testing Library**.
 
----
+### React / TypeScript rules
+- **Strict types:** never use `any`; precise interfaces or `unknown` + guards. Define types for all API responses.
+- **Functional components + hooks only.** No class components. Small, single-responsibility components; extract logic into hooks.
+- **API client layer:** never call `fetch` directly from every component.
+- **Server state:** TanStack Query (`useQuery`/`useMutation`) for all API data — never store server data in global client state. Centralize query keys; invalidate the right prefixes in mutation `onSuccess`.
+- **Client state:** `useState`/`useReducer` for local; Zustand/Redux Toolkit for shared UI state; React Context only for DI (theme/auth).
+- **Forms:** React Hook Form + `zodResolver`; map server-400 validation errors back onto fields.
+- **Performance:** memoize heavy work (`useMemo`/`useCallback`, `React.memo`); lazy-load routes/heavy modules.
+- **UX:** always handle loading, error, and empty states.
 
-## Suggested Tech Stack
+## Validation & Error Handling
 
-Frontend:
+- **Backend:** Bean Validation on request records. Throw `ResourceNotFoundException` (in `common`) for missing resources. Avoid special symbols in messages (write `degrees Celsius`, not `°C`).
+- Add `@PrePersist`/`@CreationTimestamp` before persisting entities with non-null timestamps.
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-
-Backend:
-
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Flyway
-
-Database:
-
-- PostgreSQL 16+
-
-Infrastructure:
-
-- Docker Compose
-- GitHub Actions
-- Dependabot
-- SonarQube or SonarCloud
-
-AI service, later:
-
-- Python
-- FastAPI
-- OpenCV
-- PyTorch or TensorFlow
-
----
-
-## Architecture Rules
-
-- Keep frontend, backend, and AI service separated.
-- Keep external API clients isolated inside integration packages.
-- Do not expose third-party API responses directly to the frontend.
-- Normalize external catalog data into internal database models.
-- Cache external data locally.
-- Use background jobs for sync operations when needed.
-- Keep the MVP small and testable.
-
----
-
-## Backend Package Direction
-
-Recommended package structure:
-
-```text
-com.brickdeck
-├── catalog
-├── collection
-├── comparison
-├── recommendation
-├── pricing
-├── integration
-├── security
-├── common
-└── config
+Errors conform to `GlobalExceptionHandler`:
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed",
+  "path": "/api/example",
+  "validationErrors": { "field": "message" }
+}
 ```
 
----
+## Testing Standards
 
-## Coding Standards
+Every meaningful change includes or updates tests. Follow TDD: write a failing test, watch RED, then minimal GREEN. Arrange–Act–Assert.
 
-- Prefer clear, boring, maintainable code.
-- Avoid unnecessary abstractions.
-- Add tests for business logic.
-- Add integration tests for external API mapping when possible.
-- Use DTOs for API responses.
-- Use entities only for persistence.
-- Keep controllers thin.
-- Keep business logic in services.
-- Validate inputs.
-- Handle external API errors gracefully.
+### Backend
+- Service (business logic), controller (`@WebMvcTest` — HTTP/validation/status via MockMvc, mock services with `@MockitoBean` — NOT deprecated `@MockBean`), repository (custom queries), integration (workflows via Testcontainers).
+- Full `mvnw test` / `@SpringBootTest` need Postgres on `localhost:5433`; check `nc -z -w2 localhost 5433`. Pure `@WebMvcTest`/unit slices do not need the DB.
+- Cover find-or-import both ways: `LOCAL_CACHE_HIT` and `IMPORTED_FROM_REBRICKABLE`.
+- Don't assume the shared integration DB has one record; for paginated bodies assert `$.content`, `$.content[0].id`, `$.page` — never `$[0]`.
 
----
+### Frontend
+Vitest + React Testing Library. Test behavior, not implementation. Prefer accessible queries; mock the API-client layer / hooks; wrap query hooks with a `QueryClientProvider`.
 
-## Database Rules
+## Quality & Verification Commands
 
-- Use Flyway migrations.
-- Do not modify applied migrations after they are committed.
-- Use UUIDs for primary keys unless there is a strong reason not to.
-- Use unique constraints for set numbers, part numbers, and color IDs where appropriate.
-- Add indexes for frequent lookups.
-- Track external source and sync timestamp for imported data.
+Run before considering a task done, from `apps/api` (append `.cmd` to `./mvnw` only on Windows CMD):
 
----
+```bash
+nc -z -w2 localhost 5433          # integration tests need Postgres
+./mvnw -Dtest=ClassName test       # focused, no DB for slices
+./mvnw clean verify                # full
+```
+Maven output is noisy (Mockito self-attach, JDK agent, CDS warnings are benign). Parse with `./mvnw ... 2>&1 | grep -E "Tests run:|BUILD"`.
 
-## External API Rules
+## Git Rules
 
-- Start with Rebrickable as the primary catalog source.
-- Keep API keys in environment variables.
-- Never commit real secrets.
-- Add `.env.example` with placeholder values only.
-- Add timeouts and retries for external calls.
-- Respect API rate limits.
-- Cache external data locally.
+Conventional Commits; one message per commit. Commit only when asked; if on `master`, branch first. Never push unless asked. Scopes: `catalog`, `external`, `db`, `config`, plus `docs`/`test`/`ci`/`chore`/`refactor`/`style`/`fix`/`perf`/`frontend`.
+Examples:
+- `feat(catalog): add set import endpoint`
+- `fix(catalog): add connect/read timeouts to Rebrickable client`
+- `refactor(catalog): extract theme resolution helper`
+- `test(catalog): cover set import upsert path`
 
----
+## Security & Quality
 
-## Scraping Rules
+Never hardcode secrets — use environment variables; commit `.env.example`, not `.env`. Keep Rebrickable API keys out of the repo. Do not implement scraping in the MVP; prefer official APIs and respect Terms of Service / robots.txt.
 
-- Do not implement scraping as part of the initial MVP.
-- Prefer official APIs, affiliate feeds, marketplace APIs, or user-entered prices.
-- Before scraping any site, review Terms of Service and robots.txt.
-- Do not bypass anti-bot systems.
-- Do not scrape aggressively.
+## Critical Anti-Patterns (what NOT to do)
 
----
+1. **Don't leak entities.** Never return JPA entities from controllers — map to explicit DTO records.
+2. **Don't expose raw Rebrickable responses.** Normalize into internal models first.
+3. **Don't re-fetch on a cache hit.** Find-or-import is cache-first — local hit skips Rebrickable and skips save.
+4. **Don't use `@MockBean`.** Use `@MockitoBean` (Spring Boot 3.5.x).
+5. **Don't persist entities without timestamps set** (`@PrePersist`/`@CreationTimestamp` for non-null `created_at`/`updated_at`).
+6. **Don't use `any` (frontend).** Precise types or `unknown` + guards.
+7. **Don't store server data in global client state.** Use TanStack Query.
+8. **Don't assert `$[0]` on paginated bodies.** Use `$.content[0]`.
+9. **Don't put special symbols in validation messages** (`°C` → `degrees Celsius`).
+10. **Don't hardcode secrets.** Use env vars and `.env.example`.
 
-## AI Rules
+## Important Instruction
 
-- Do not implement computer vision before the basic product is usable.
-- Start with AI-generated text summaries before image recognition.
-- For visual classification, always return confidence scores.
-- Always require user confirmation before saving uncertain AI results.
-- Treat AI as an assistant, not as a source of absolute truth.
-
----
-
-## MVP Definition
-
-The MVP is complete when a user can:
-
-- Search a LEGO set
-- View set details and parts inventory
-- Add the set to their collection
-- Add loose pieces manually
-- Compare two sets
-- See missing pieces for a target set
-- Receive basic build recommendations
-
----
-
-## Things Not to Do Yet
-
-Do not start with:
-
-- Full marketplace support
-- Aggressive scraping
-- Mobile app
-- Complex social features
-- Large AI model training
-- Paid subscriptions
-- Public launch infrastructure
-
-These are later phases.
-
----
-
-## Communication Style for AI Assistant
-
-When helping with this project:
-
-- Be direct and practical.
-- Explain trade-offs clearly.
-- Prefer incremental implementation.
-- Point out risks early.
-- Suggest production-ready patterns when useful.
-- Avoid unnecessary complexity.
-- Keep the project aligned with the roadmap.
+Before making changes:
+1. Inspect current files.
+2. Identify the smallest safe change (roadmap order).
+3. Explain what will change.
+4. Write a failing test (TDD), then apply code changes to pass it.
+5. Update or add tests.
+6. Run or suggest the exact verification command.
+7. Provide a Conventional Commit message.
+8. Update `.claude/project-state.md` and `.claude/roadmap.md` when a task/phase completes.
