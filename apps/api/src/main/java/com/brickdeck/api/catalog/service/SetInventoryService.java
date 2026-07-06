@@ -1,16 +1,20 @@
 package com.brickdeck.api.catalog.service;
 
 import com.brickdeck.api.catalog.dto.InventoryImportResult;
+import com.brickdeck.api.catalog.dto.SetPartResponse;
 import com.brickdeck.api.catalog.entity.BrickSet;
 import com.brickdeck.api.catalog.entity.Color;
 import com.brickdeck.api.catalog.entity.Part;
 import com.brickdeck.api.catalog.entity.SetPart;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
 import com.brickdeck.api.catalog.repository.SetPartRepository;
+import com.brickdeck.api.common.PageResponse;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
 import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetPartResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +74,35 @@ public class SetInventoryService {
         }
 
         return new InventoryImportResult(set.getExternalSetNumber(), linesProcessed);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<SetPartResponse> findInventory(String setNumber, Pageable pageable) {
+        String normalized = SetNumbers.normalize(setNumber);
+        Page<SetPart> page = setPartRepository.findByBrickSet_ExternalSetNumber(normalized, pageable);
+        List<SetPartResponse> content = page.getContent()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        return PageResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    private SetPartResponse toResponse(SetPart line) {
+        Part part = line.getPart();
+        Color color = line.getColor();
+        return new SetPartResponse(
+                line.getId(),
+                line.getBrickSet().getExternalSetNumber(),
+                part.getExternalPartNumber(),
+                part.getName(),
+                part.getImageUrl(),
+                color.getExternalId(),
+                color.getName(),
+                color.getRgb(),
+                line.getQuantity(),
+                line.isSpare(),
+                line.getExternalElementId()
+        );
     }
 
     private void upsertLine(BrickSet set, RebrickableSetPartResponse line) {

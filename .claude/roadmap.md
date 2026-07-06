@@ -20,7 +20,7 @@ Status: In Progress
 - Theme upsert + resolution — Done
 - Set import (upsert) + read-only lookup — Done
 - Catalog search endpoint (Rebrickable-backed, `PageResponse`) — Done
-- Set inventory (parts, colors) import + read — In Progress (schema foundation done; client/import/read endpoint next)
+- Set inventory (parts, colors) import + read — Done (schema, client, import service, endpoints)
 - Scaffold Next.js frontend (`apps/web`) — Not Started
 
 Success criteria: user can search a LEGO set and view its parts inventory.
