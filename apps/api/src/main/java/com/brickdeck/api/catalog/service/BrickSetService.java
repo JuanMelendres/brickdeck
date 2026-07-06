@@ -10,6 +10,8 @@ import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
 import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -41,11 +43,13 @@ public class BrickSetService {
     }
 
     @Transactional(readOnly = true)
-    public List<BrickSetResponse> findAll() {
-        return brickSetRepository.findAll()
+    public PageResponse<BrickSetResponse> findAll(Pageable pageable) {
+        Page<BrickSet> page = brickSetRepository.findAll(pageable);
+        List<BrickSetResponse> content = page.getContent()
                 .stream()
                 .map(brickSet -> toResponse(brickSet, STATUS_LOCAL_CACHE_HIT))
                 .toList();
+        return PageResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
     }
 
     @Transactional(readOnly = true)

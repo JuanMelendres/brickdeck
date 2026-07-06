@@ -16,6 +16,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
@@ -60,7 +64,7 @@ class BrickSetServiceTest {
     }
 
     @Test
-    void returnsAllSetsFromLocalCatalog() {
+    void returnsPagedSetsFromLocalCatalog() {
         UUID setId = UUID.randomUUID();
 
         BrickSet set = new BrickSet();
@@ -69,13 +73,21 @@ class BrickSetServiceTest {
         set.setName("Millennium Falcon");
         set.setSource("REBRICKABLE");
 
-        when(brickSetRepository.findAll()).thenReturn(List.of(set));
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("externalSetNumber"));
+        when(brickSetRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(List.of(set), pageable, 1));
 
-        List<BrickSetResponse> responses = brickSetService.findAll();
+        PageResponse<BrickSetResponse> page = brickSetService.findAll(pageable);
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(setId);
-        assertThat(responses.get(0).cacheStatus()).isEqualTo("LOCAL_CACHE_HIT");
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().get(0).id()).isEqualTo(setId);
+        assertThat(page.content().get(0).cacheStatus()).isEqualTo("LOCAL_CACHE_HIT");
+        assertThat(page.page()).isZero();
+        assertThat(page.size()).isEqualTo(20);
+        assertThat(page.totalElements()).isEqualTo(1);
+        assertThat(page.totalPages()).isEqualTo(1);
+        assertThat(page.first()).isTrue();
+        assertThat(page.last()).isTrue();
     }
 
     @Test
