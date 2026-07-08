@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserSetRepository extends JpaRepository<UserSet, UUID> {
@@ -14,4 +15,7 @@ public interface UserSetRepository extends JpaRepository<UserSet, UUID> {
 
     @EntityGraph(attributePaths = {"brickSet", "brickSet.theme"})
     Page<UserSet> findByUserId(UUID userId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"brickSet", "brickSet.theme"})
+    Optional<UserSet> findByIdAndUserId(UUID id, UUID userId);
 }

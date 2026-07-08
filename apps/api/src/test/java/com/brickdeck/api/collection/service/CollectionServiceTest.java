@@ -5,11 +5,13 @@ import com.brickdeck.api.catalog.entity.Theme;
 import com.brickdeck.api.catalog.service.BrickSetService;
 import com.brickdeck.api.collection.DuplicateCollectionEntryException;
 import com.brickdeck.api.collection.dto.AddUserSetRequest;
+import com.brickdeck.api.collection.dto.UpdateUserSetRequest;
 import com.brickdeck.api.collection.dto.UserSetResponse;
 import com.brickdeck.api.collection.entity.CollectionStatus;
 import com.brickdeck.api.collection.entity.UserSet;
 import com.brickdeck.api.collection.repository.UserSetRepository;
 import com.brickdeck.api.common.PageResponse;
+import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.security.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -159,5 +162,79 @@ class CollectionServiceTest {
         assertThat(page.totalElements()).isEqualTo(1);
         assertThat(page.first()).isTrue();
         assertThat(page.last()).isTrue();
+    }
+
+    @Test
+    void updateEntryAppliesNonNullFieldsOnly() {
+        User owner = owner();
+        BrickSet set = falcon();
+
+        UserSet entry = new UserSet();
+        entry.setId(UUID.randomUUID());
+        entry.setUser(owner);
+        entry.setBrickSet(set);
+        entry.setStatus(CollectionStatus.OWNED);
+        entry.setPurchasePrice(new BigDecimal("100.00"));
+        entry.setPurchaseDate(LocalDate.of(2023, 1, 1));
+
+        when(userSetRepository.findByIdAndUserId(entry.getId(), owner.getId()))
+                .thenReturn(Optional.of(entry));
+        when(userSetRepository.save(any(UserSet.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // status changes; purchasePrice/purchaseDate omitted (null) -> preserved
+        UpdateUserSetRequest request = new UpdateUserSetRequest(CollectionStatus.BUILT, null, null);
+
+        UserSetResponse response = collectionService.updateEntry(owner, entry.getId(), request);
+
+        assertThat(response.status()).isEqualTo(CollectionStatus.BUILT);
+        assertThat(response.purchasePrice()).isEqualByComparingTo("100.00");
+        assertThat(response.purchaseDate()).isEqualTo(LocalDate.of(2023, 1, 1));
+    }
+
+    @Test
+    void updateEntryThrowsWhenNotOwnedOrMissing() {
+        User owner = owner();
+        UUID entryId = UUID.randomUUID();
+
+        when(userSetRepository.findByIdAndUserId(entryId, owner.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> collectionService.updateEntry(
+                owner, entryId, new UpdateUserSetRequest(CollectionStatus.BUILT, null, null)))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(entryId.toString());
+
+        verify(userSetRepository, never()).save(any(UserSet.class));
+    }
+
+    @Test
+    void removeEntryDeletesOwnedEntry() {
+        User owner = owner();
+
+        UserSet entry = new UserSet();
+        entry.setId(UUID.randomUUID());
+        entry.setUser(owner);
+        entry.setBrickSet(falcon());
+
+        when(userSetRepository.findByIdAndUserId(entry.getId(), owner.getId()))
+                .thenReturn(Optional.of(entry));
+
+        collectionService.removeEntry(owner, entry.getId());
+
+        verify(userSetRepository).delete(entry);
+    }
+
+    @Test
+    void removeEntryThrowsWhenNotOwnedOrMissing() {
+        User owner = owner();
+        UUID entryId = UUID.randomUUID();
+
+        when(userSetRepository.findByIdAndUserId(entryId, owner.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> collectionService.removeEntry(owner, entryId))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(userSetRepository, never()).delete(any(UserSet.class));
     }
 }
