@@ -33,7 +33,7 @@ Status: In Progress
 
 - Auth foundation (2a) — Done: JWT (stateless), users table, register/login/me, Spring Security
 - Add set to collection (2b) — Done: `user_sets` table (V6), `POST/GET/PATCH/DELETE /api/v1/collection/sets`, auth + owner-scoped, find-or-import target set, status/purchase price+date, 409 on duplicate, partial update + remove (cross-user → 404)
-- Loose pieces manual inventory (2c), quantity by part/color, storage location — Not Started
+- Loose pieces manual inventory (2c) — Done: `user_parts` table (V7), `POST/GET/PATCH/DELETE /api/v1/collection/parts`, quantity by part+color, storage location, unique per (user, part, color) + 409, owner-scoped; part+color must be pre-imported in catalog (missing ref → 404)
 - Frontend login/register wiring — Not Started
 
 Decomposed into 2a (auth) → 2b (add-set) → 2c (loose pieces). Auth = JWT stateless (see `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`).

@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done, 2b add-set-to-collection done (incl. PATCH/DELETE polish). Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2c loose pieces, then frontend auth wiring.
+Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done, 2b add-set-to-collection done (incl. PATCH/DELETE polish), 2c loose pieces done. Backend for Phase 2 complete; remaining is frontend auth + collection UI. Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2c loose pieces, then frontend auth wiring.
 
 ## Completed
 
@@ -38,6 +38,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Recently Worked On
 
+- Phase 2c loose pieces manual inventory (backend): V7 `user_parts` table (FK user+part+color, unique `(user_id, part_id, color_id)`, quantity, storage_location), `collection` — `UserPart` entity, `UserPartRepository` (`existsByUserIdAndPartIdAndColorId`, `findByUserId`/`findByIdAndUserId` +`@EntityGraph` part+color), `AddUserPartRequest`/`UpdateUserPartRequest`/`UserPartResponse`, `UserPartService`, `UserPartController` at `/api/v1/collection/parts` (`POST` 201+Location, `GET` `PageResponse` `@PageableDefault size=20 sort=createdAt DESC`, `PATCH` partial, `DELETE` 204). Part+color resolved from local catalog by `externalPartNumber`/`externalId` (must be pre-imported via a set's inventory — no single-part Rebrickable fetch exists; missing → 404); duplicate → 409; owner-scoped. Integration test seeds synthetic Part(`IT-PART-3001`)+Color(`999001`). 105 tests (+19). Branch `feat/collection-loose-pieces`.
 - Phase 2b polish (backend): `PATCH /api/v1/collection/sets/{id}` (partial update — non-null status/purchasePrice/purchaseDate applied, cannot clear to null; `UpdateUserSetRequest`) + `DELETE /api/v1/collection/sets/{id}` → 204. Owner-scoped via `UserSetRepository.findByIdAndUserId` (+`@EntityGraph`); missing or not-owned → `ResourceNotFoundException` 404 (no existence leak). Git-flow adopted: `develop` is now the default branch; features → develop → master. 86 tests (+9). Branch `feat/collection-2b-polish`.
 - Phase 2b add-set-to-collection (backend): V6 `user_sets` table (FK user+set, unique `(user_id, set_id)`, status/purchase_price/purchase_date), `collection` package — `UserSet` entity + `CollectionStatus` enum (OWNED/WISHLIST/BUILT/IN_PROGRESS), `UserSetRepository` (`existsByUserIdAndBrickSetId`, `findByUserId` + `@EntityGraph`), `AddUserSetRequest`/`UserSetResponse` DTOs, `CollectionService` (find-or-import target via new `BrickSetService.findOrImportEntity`, owner-scoped, dup→409), `CollectionController` (`POST` 201+Location, `GET` `PageResponse` `@PageableDefault size=20 sort=createdAt DESC`), `DuplicateCollectionEntryException`→409 in `GlobalExceptionHandler`. Controller WebMvcTest keeps default security filters (not `addFilters=false`) so `@AuthenticationPrincipal` resolves via `authentication()`/`csrf()` post-processors. Integration test seeds a synthetic set number for the cache-hit path (shared DB already holds real numbers). 77 tests (+10).
 - Phase 2a auth foundation (backend): Spring Security + stateless JWT (jjwt 0.12.6), V5 `users` table + `User` entity/repo, `AuthService` (register/login, BCrypt), `JwtService`, `JwtAuthenticationFilter` (Bearer → SecurityContext, principal = `User`), `SecurityConfig` (stateless, permit auth+swagger+health, CORS source), `AuthController` (`POST /api/v1/auth/register` 201, `/login` 200, `GET /me`), `GlobalExceptionHandler` +409/+401/+400. Catalog `@WebMvcTest` slices now use `@AutoConfigureMockMvc(addFilters=false)`. 67 tests (JwtService, AuthService, AuthIntegration). Spec: `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`.
@@ -68,6 +69,6 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Immediate Next Steps
 
-1. Phase 2c: loose pieces manual inventory (`user_parts`, quantity by part/color, storage location).
-2. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes; then collection UI.
-3. Add Postman collection under `docs/postman`; mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
+1. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes; then collection UI (sets + loose parts).
+2. Add Postman collection under `docs/postman` (now covers auth + collection sets/parts); mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
+3. Optional later: single-part find-or-import (`RebrickableClient.getPart/getColor`) so loose pieces can be added without pre-importing a set.
