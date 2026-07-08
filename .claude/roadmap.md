@@ -32,7 +32,7 @@ Success criteria: user can search a LEGO set and view its parts inventory. Backe
 Status: In Progress
 
 - Auth foundation (2a) — Done: JWT (stateless), users table, register/login/me, Spring Security
-- Add set to collection (2b) — Done: `user_sets` table (V6), `POST/GET /api/v1/collection/sets`, auth + owner-scoped, find-or-import target set, status/purchase price+date, 409 on duplicate
+- Add set to collection (2b) — Done: `user_sets` table (V6), `POST/GET/PATCH/DELETE /api/v1/collection/sets`, auth + owner-scoped, find-or-import target set, status/purchase price+date, 409 on duplicate, partial update + remove (cross-user → 404)
 - Loose pieces manual inventory (2c), quantity by part/color, storage location — Not Started
 - Frontend login/register wiring — Not Started
 

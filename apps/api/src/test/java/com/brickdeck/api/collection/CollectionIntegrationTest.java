@@ -13,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -99,6 +101,65 @@ class CollectionIntegrationTest {
                         .content(body))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void updateEntryChangesStatus() throws Exception {
+        String id = addSetAndGetId(token);
+
+        mockMvc.perform(patch(COLLECTION + "/" + id)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"status":"WISHLIST"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.status").value("WISHLIST"));
+    }
+
+    @Test
+    void removeEntryReturns204AndClearsList() throws Exception {
+        String id = addSetAndGetId(token);
+
+        mockMvc.perform(delete(COLLECTION + "/" + id)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get(COLLECTION)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    void cannotModifyAnotherUsersEntry() throws Exception {
+        String id = addSetAndGetId(token);
+        String otherToken = register("other-user@brickdeck.test", "secret123");
+
+        mockMvc.perform(patch(COLLECTION + "/" + id)
+                        .header("Authorization", "Bearer " + otherToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"status":"WISHLIST"}
+                                """))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(delete(COLLECTION + "/" + id)
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isNotFound());
+    }
+
+    private String addSetAndGetId(String authToken) throws Exception {
+        String body = mockMvc.perform(post(COLLECTION)
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"setNumber\":\"%s\"}".formatted(SET_NUMBER)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        return objectMapper.readTree(body).get("id").asText();
     }
 
     private String register(String email, String password) throws Exception {

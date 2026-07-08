@@ -5,12 +5,16 @@ import com.brickdeck.api.catalog.entity.Theme;
 import com.brickdeck.api.catalog.service.BrickSetService;
 import com.brickdeck.api.collection.DuplicateCollectionEntryException;
 import com.brickdeck.api.collection.dto.AddUserSetRequest;
+import com.brickdeck.api.collection.dto.UpdateUserSetRequest;
 import com.brickdeck.api.collection.dto.UserSetResponse;
 import com.brickdeck.api.collection.entity.CollectionStatus;
 import com.brickdeck.api.collection.entity.UserSet;
 import com.brickdeck.api.collection.repository.UserSetRepository;
 import com.brickdeck.api.common.PageResponse;
+import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.security.entity.User;
+
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -55,6 +59,34 @@ public class CollectionService {
                 .map(this::toResponse)
                 .toList();
         return PageResponse.of(content, page.getNumber(), page.getSize(), page.getTotalElements());
+    }
+
+    @Transactional
+    public UserSetResponse updateEntry(User owner, UUID entryId, UpdateUserSetRequest request) {
+        UserSet entry = requireOwnedEntry(owner, entryId);
+
+        if (request.status() != null) {
+            entry.setStatus(request.status());
+        }
+        if (request.purchasePrice() != null) {
+            entry.setPurchasePrice(request.purchasePrice());
+        }
+        if (request.purchaseDate() != null) {
+            entry.setPurchaseDate(request.purchaseDate());
+        }
+
+        return toResponse(userSetRepository.save(entry));
+    }
+
+    @Transactional
+    public void removeEntry(User owner, UUID entryId) {
+        userSetRepository.delete(requireOwnedEntry(owner, entryId));
+    }
+
+    private UserSet requireOwnedEntry(User owner, UUID entryId) {
+        return userSetRepository.findByIdAndUserId(entryId, owner.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Collection entry not found: " + entryId));
     }
 
     private UserSetResponse toResponse(UserSet entry) {

@@ -23,10 +23,13 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -107,5 +110,34 @@ class CollectionControllerTest {
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(20))
                 .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void updateReturns200WithUpdatedEntry() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(collectionService.updateEntry(any(User.class), eq(id), any()))
+                .thenReturn(falconEntry());
+
+        mockMvc.perform(patch("/api/v1/collection/sets/{id}", id)
+                        .with(authentication(principal()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"status":"BUILT"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.setNumber").value("75375-1"));
+    }
+
+    @Test
+    void removeReturns204() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/collection/sets/{id}", id)
+                        .with(authentication(principal()))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(collectionService).removeEntry(any(User.class), eq(id));
     }
 }
