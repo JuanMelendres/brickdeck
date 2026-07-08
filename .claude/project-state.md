@@ -2,11 +2,11 @@
 
 ## Last Updated
 
-2026-07-06
+2026-07-08
 
 ## Current Phase
 
-Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done. Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2b add-set-to-collection, then frontend auth wiring.
+Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done, 2b add-set-to-collection done. Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2c loose pieces, then frontend auth wiring.
 
 ## Completed
 
@@ -38,6 +38,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Recently Worked On
 
+- Phase 2b add-set-to-collection (backend): V6 `user_sets` table (FK user+set, unique `(user_id, set_id)`, status/purchase_price/purchase_date), `collection` package — `UserSet` entity + `CollectionStatus` enum (OWNED/WISHLIST/BUILT/IN_PROGRESS), `UserSetRepository` (`existsByUserIdAndBrickSetId`, `findByUserId` + `@EntityGraph`), `AddUserSetRequest`/`UserSetResponse` DTOs, `CollectionService` (find-or-import target via new `BrickSetService.findOrImportEntity`, owner-scoped, dup→409), `CollectionController` (`POST` 201+Location, `GET` `PageResponse` `@PageableDefault size=20 sort=createdAt DESC`), `DuplicateCollectionEntryException`→409 in `GlobalExceptionHandler`. Controller WebMvcTest keeps default security filters (not `addFilters=false`) so `@AuthenticationPrincipal` resolves via `authentication()`/`csrf()` post-processors. Integration test seeds a synthetic set number for the cache-hit path (shared DB already holds real numbers). 77 tests (+10).
 - Phase 2a auth foundation (backend): Spring Security + stateless JWT (jjwt 0.12.6), V5 `users` table + `User` entity/repo, `AuthService` (register/login, BCrypt), `JwtService`, `JwtAuthenticationFilter` (Bearer → SecurityContext, principal = `User`), `SecurityConfig` (stateless, permit auth+swagger+health, CORS source), `AuthController` (`POST /api/v1/auth/register` 201, `/login` 200, `GET /me`), `GlobalExceptionHandler` +409/+401/+400. Catalog `@WebMvcTest` slices now use `@AutoConfigureMockMvc(addFilters=false)`. 67 tests (JwtService, AuthService, AuthIntegration). Spec: `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`.
 - OpenAPI-generated frontend types: `openapi-typescript` → `src/lib/types/schema.d.ts` (from `/v3/api-docs`); `lib/types/api.ts` now derives `BrickSetResponse`/`SetPartResponse`/`InventoryImportResult` from the schema (via `Nullable<T>` — DTOs have no OpenAPI nullability metadata but Jackson emits nulls). `PageResponse<T>` stays hand-written (OpenAPI can't express the generic). `npm run gen:api` refreshes against the running API.
 - Frontend set-detail + parts-inventory slice (`/sets/[setNumber]`, import button) — TDD (32 tests), typecheck/lint/build green
@@ -66,6 +67,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Immediate Next Steps
 
-1. Phase 2b: add-set-to-collection (`user_sets` table, `POST/GET /api/v1/collection/sets`, auth required, owner-scoped).
-2. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes.
-3. Add Postman collection under `docs/postman`; mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
+1. Phase 2b polish: set status update (`PATCH`) + remove-from-collection (`DELETE` → 204), if wanted before 2c.
+2. Phase 2c: loose pieces manual inventory (`user_parts`, quantity by part/color, storage location).
+3. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes; then collection UI.
+4. Add Postman collection under `docs/postman`; mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.

@@ -18,6 +18,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BrickSetService {
@@ -72,6 +73,24 @@ public class BrickSetService {
 
         long totalElements = external.count() != null ? external.count() : content.size();
         return PageResponse.of(content, page, size, totalElements);
+    }
+
+    /**
+     * Returns the local {@link BrickSet} for the given number, importing it from Rebrickable
+     * on a cache miss. Cache-first: a local hit skips Rebrickable and skips saving.
+     *
+     * <p>Exposed for sibling domains (e.g. collection) that need to reference the catalog
+     * aggregate; other callers should prefer the DTO-returning read methods.
+     */
+    @Transactional
+    public BrickSet findOrImportEntity(String setNumber) {
+        String normalized = SetNumbers.normalize(setNumber);
+        return brickSetRepository.findByExternalSetNumber(normalized)
+                .orElseGet(() -> {
+                    UUID importedId = importSet(normalized).body().id();
+                    return brickSetRepository.findById(importedId)
+                            .orElseThrow(() -> new ResourceNotFoundException("Set not found: " + normalized));
+                });
     }
 
     @Transactional

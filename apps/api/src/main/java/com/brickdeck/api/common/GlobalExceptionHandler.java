@@ -1,5 +1,6 @@
 package com.brickdeck.api.common;
 
+import com.brickdeck.api.collection.DuplicateCollectionEntryException;
 import com.brickdeck.api.security.EmailAlreadyUsedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailAlreadyUsedException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyUsed(EmailAlreadyUsedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateCollectionEntryException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateCollectionEntry(DuplicateCollectionEntryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(ex.getMessage()));
     }
