@@ -49,6 +49,23 @@ describe("apiGet", () => {
       ApiError,
     );
   });
+
+  it("captures validationErrors from a 400 body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse(
+        {
+          message: "Validation failed",
+          validationErrors: { email: "must be a well-formed email address" },
+        },
+        400,
+      ),
+    );
+
+    await expect(apiGet("/api/v1/auth/register")).rejects.toMatchObject({
+      status: 400,
+      validationErrors: { email: "must be a well-formed email address" },
+    });
+  });
 });
 
 describe("apiPost", () => {

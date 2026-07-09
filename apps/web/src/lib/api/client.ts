@@ -1,13 +1,21 @@
 import { API_BASE_URL } from "@/lib/env";
 import { clearToken, getToken } from "@/lib/auth/tokenStore";
 
+export type ValidationErrors = Record<string, string>;
+
 export class ApiError extends Error {
   readonly status: number;
+  readonly validationErrors?: ValidationErrors;
 
-  constructor(status: number, message: string) {
+  constructor(
+    status: number,
+    message: string,
+    validationErrors?: ValidationErrors,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.validationErrors = validationErrors;
   }
 }
 
@@ -28,16 +36,21 @@ function buildUrl(path: string, params?: QueryParams): string {
   return url.toString();
 }
 
-async function extractMessage(response: Response): Promise<string> {
+async function extractError(
+  response: Response,
+): Promise<{ message: string; validationErrors?: ValidationErrors }> {
   try {
-    const body = (await response.json()) as { message?: string };
+    const body = (await response.json()) as {
+      message?: string;
+      validationErrors?: ValidationErrors;
+    };
     if (body && typeof body.message === "string") {
-      return body.message;
+      return { message: body.message, validationErrors: body.validationErrors };
     }
   } catch {
     // non-JSON error body
   }
-  return `Request failed with status ${response.status}`;
+  return { message: `Request failed with status ${response.status}` };
 }
 
 async function request<T>(url: string, init: RequestInit): Promise<T> {
@@ -55,7 +68,8 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
     if (response.status === 401) {
       clearToken();
     }
-    throw new ApiError(response.status, await extractMessage(response));
+    const { message, validationErrors } = await extractError(response);
+    throw new ApiError(response.status, message, validationErrors);
   }
 
   return (await response.json()) as T;
