@@ -6,7 +6,7 @@ Docs-as-code for BrickDeck. Start here.
 - [Vision](./product/vision.md) — what BrickDeck is, the problem, users, scope.
 - [Roadmap](./product/roadmap.md) — phased plan.
 - [Features](./product/features.md) — feature list with status.
-- [FDDs](./product/fdd/) — [set search](./product/fdd/set-search-fdd.md), [set inventory](./product/fdd/set-inventory-fdd.md), [authentication](./product/fdd/authentication-fdd.md), [collection sets](./product/fdd/collection-sets-fdd.md), [collection loose parts](./product/fdd/collection-loose-parts-fdd.md).
+- [FDDs](./product/fdd/) — [set search](./product/fdd/set-search-fdd.md), [set inventory](./product/fdd/set-inventory-fdd.md), [authentication](./product/fdd/authentication-fdd.md), [collection sets](./product/fdd/collection-sets-fdd.md), [collection loose parts](./product/fdd/collection-loose-parts-fdd.md), [missing pieces](./product/fdd/missing-pieces-fdd.md).
 - [AI strategy](./product/ai-strategy.md) · [Pricing & scraping policy](./product/pricing-scraping-policy.md)
 
 ## Architecture

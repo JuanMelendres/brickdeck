@@ -8,12 +8,12 @@ package com.brickdeck.api.catalog.service;
  * Exact Rebrickable lookups require the suffix, so a bare number is normalized to the
  * default first variant ({@code -1}).
  */
-final class SetNumbers {
+public final class SetNumbers {
 
     private SetNumbers() {
     }
 
-    static String normalize(String setNumber) {
+    public static String normalize(String setNumber) {
         if (setNumber == null) {
             return null;
         }
