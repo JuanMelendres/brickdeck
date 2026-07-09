@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, apiGet, apiPost } from "./client";
+import { ApiError, apiDelete, apiGet, apiPost } from "./client";
 import { getToken, setToken } from "@/lib/auth/tokenStore";
 
 const jsonResponse = (body: unknown, status = 200): Response =>
@@ -96,6 +96,34 @@ describe("apiPost", () => {
     await expect(
       apiPost("/api/v1/catalog/sets/x/inventory/import"),
     ).rejects.toMatchObject({ status: 404, message: "Set not imported" });
+  });
+});
+
+describe("apiDelete", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("sends a DELETE and resolves without parsing a body", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null, { status: 204 }));
+
+    await expect(
+      apiDelete("/api/v1/collection/sets/abc"),
+    ).resolves.toBeUndefined();
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://localhost:8080/api/v1/collection/sets/abc");
+    expect((init as RequestInit).method).toBe("DELETE");
+  });
+
+  it("throws ApiError on non-2xx", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ message: "Not found" }, 404),
+    );
+
+    await expect(
+      apiDelete("/api/v1/collection/sets/missing"),
+    ).rejects.toMatchObject({ status: 404, message: "Not found" });
   });
 });
 

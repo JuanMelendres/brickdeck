@@ -65,6 +65,9 @@ describe("NavBar", () => {
     expect(
       screen.queryByRole("button", { name: /log out/i }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /collection/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows the user and a logout button when authenticated", () => {
@@ -74,6 +77,9 @@ describe("NavBar", () => {
     expect(
       screen.getByRole("button", { name: /log out/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /collection/i }),
+    ).toHaveAttribute("href", "/collection");
     expect(
       screen.queryByRole("link", { name: /log in/i }),
     ).not.toBeInTheDocument();
