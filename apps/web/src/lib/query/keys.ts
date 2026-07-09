@@ -9,4 +9,10 @@ export const queryKeys = {
     parts: (setNumber: string, page: number, size: number) =>
       ["sets", "parts", setNumber, page, size] as const,
   },
+  collection: {
+    all: ["collection"] as const,
+    setsAll: ["collection", "sets"] as const,
+    sets: (page: number, size: number) =>
+      ["collection", "sets", page, size] as const,
+  },
 };

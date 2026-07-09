@@ -53,7 +53,7 @@ async function extractError(
   return { message: `Request failed with status ${response.status}` };
 }
 
-async function request<T>(url: string, init: RequestInit): Promise<T> {
+async function rawRequest(url: string, init: RequestInit): Promise<Response> {
   const token = getToken();
   const authHeader: Record<string, string> = token
     ? { Authorization: `Bearer ${token}` }
@@ -72,7 +72,20 @@ async function request<T>(url: string, init: RequestInit): Promise<T> {
     throw new ApiError(response.status, message, validationErrors);
   }
 
+  return response;
+}
+
+async function request<T>(url: string, init: RequestInit): Promise<T> {
+  const response = await rawRequest(url, init);
   return (await response.json()) as T;
+}
+
+function jsonBodyInit(method: string, body?: unknown): RequestInit {
+  return {
+    method,
+    headers: body === undefined ? {} : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
 }
 
 export function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
@@ -80,10 +93,14 @@ export function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
 }
 
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  return request<T>(buildUrl(path), {
-    method: "POST",
-    headers:
-      body === undefined ? {} : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  return request<T>(buildUrl(path), jsonBodyInit("POST", body));
+}
+
+export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(buildUrl(path), jsonBodyInit("PATCH", body));
+}
+
+/** DELETE returning no body (204 No Content). */
+export async function apiDelete(path: string): Promise<void> {
+  await rawRequest(buildUrl(path), { method: "DELETE" });
 }
