@@ -18,9 +18,22 @@ Prioritize maintainability, strict type safety, correctness, small incremental c
 BrickDeck is a LEGO collection intelligence platform.
 
 - **Backend:** A Spring Boot REST API (`apps/api`) that imports and caches LEGO catalog data (sets, themes, parts, colors) from Rebrickable, then powers collection, missing-piece, comparison, and recommendation features.
-- **Frontend:** A Next.js (App Router) app (`apps/web`) that consumes the REST API. **Not yet scaffolded.**
+- **Frontend:** A Next.js (App Router) app (`apps/web`) that consumes the REST API. Scaffolded (MUI) with set search + set-detail/parts pages.
 
-Current phase: **Phase 1 — Catalog Foundation**. Product priority order and full roadmap live in `docs/ROADMAP.md`; architecture in `docs/ARCHITECTURE.md`. Build the backend/catalog stable before starting the frontend.
+Current phase: **Phase 2 — User Collection** (backend complete; frontend auth wiring next). Product roadmap: `docs/product/roadmap.md`; architecture: `docs/architecture/overview.md`. Build the backend/catalog stable before extending the frontend.
+
+## Documentation Map (docs-as-code)
+
+Keep docs in sync with code. Home: `docs/README.md`.
+
+- **Product:** `docs/product/` — `vision.md`, `roadmap.md`, `features.md`, `fdd/`.
+- **Architecture:** `docs/architecture/` — `overview.md`, `technical-design.md`, `database-design.md`, `api-design.md`, `diagrams.md`.
+- **Decisions:** `docs/decisions/` — ADR-001..010.
+- **API:** `docs/api/` — `openapi.yaml` (static summary; live spec at `/v3/api-docs`), `postman/`.
+- **Testing:** `docs/testing/` — strategy, test-plan, unit, integration.
+- **Development:** `docs/development/` — setup, environment-variables, coding-standards, contribution-guide.
+
+When you change behavior/schema/endpoints/decisions, update the matching doc (see `docs/development/contribution-guide.md` → "Keeping Documentation Alive"). Avoid duplicating deep content across README, CLAUDE.md, and `docs/`.
 
 ## Backend Stack & Architecture
 
