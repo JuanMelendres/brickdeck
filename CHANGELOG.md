@@ -7,6 +7,16 @@ pre-release and not yet versioned (see the roadmap for phases).
 ## [Unreleased]
 
 ### Added
+- Missing-pieces engine (Phase 3a, backend): authenticated
+  `GET /api/v1/sets/{setNumber}/missing-parts` returning a `MissingPartsReport`
+  (required vs owned per part+color and completion percentage). Owned combines
+  loose parts and the parts of owned/built/in-progress sets; spares count toward
+  owned, not required.
+- Full Phase 2 frontend: auth wiring (token store, Bearer client, login/register,
+  AuthProvider, route guard, nav/logout) and collection UI (owned sets + loose
+  parts) in `apps/web`.
+- CI pipeline (GitHub Actions): backend `mvnw verify` against a PostgreSQL
+  service, and frontend lint/typecheck/test/build.
 - Documentation reorganized into a docs-as-code structure under `docs/`
   (product, architecture, decisions, api, testing, development) with ADRs,
   a static OpenAPI spec, and lightweight FDDs.

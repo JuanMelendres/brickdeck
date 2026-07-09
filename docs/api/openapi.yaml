@@ -153,6 +153,21 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/InventoryImportResult" }
         "404": { description: Set not imported yet }
+  /api/v1/sets/{setNumber}/missing-parts:
+    get:
+      tags: [Catalog]
+      summary: Missing-pieces report for a target set
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: setNumber, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MissingPartsReport" }
+        "401": { description: Unauthorized }
+        "404": { description: Set or inventory not imported }
 
   /api/v1/collection/sets:
     post:
@@ -359,6 +374,29 @@ components:
       properties:
         setNumber: { type: string }
         linesProcessed: { type: integer }
+    MissingPartLine:
+      type: object
+      properties:
+        partNumber: { type: string }
+        partName: { type: string }
+        partImageUrl: { type: string }
+        colorExternalId: { type: integer }
+        colorName: { type: string }
+        colorRgb: { type: string }
+        required: { type: integer }
+        owned: { type: integer }
+        missing: { type: integer }
+    MissingPartsReport:
+      type: object
+      properties:
+        setNumber: { type: string }
+        totalRequired: { type: integer }
+        totalOwned: { type: integer }
+        totalMissing: { type: integer }
+        completionPercentage: { type: number, format: double }
+        lines:
+          type: array
+          items: { $ref: "#/components/schemas/MissingPartLine" }
     AddUserSetRequest:
       type: object
       required: [setNumber]

@@ -77,6 +77,11 @@ For request/response conventions, error codes, and auth details also see
 | PATCH | `/api/v1/collection/parts/{id}` | `UpdateUserPartRequest` | `UserPartResponse` |
 | DELETE | `/api/v1/collection/parts/{id}` | — | `204` |
 
+### Missing Pieces (Bearer required)
+| Method | Path | Auth | Notes |
+| --- | --- | --- | --- |
+| GET | `/api/v1/sets/{setNumber}/missing-parts` | Bearer | `MissingPartsReport` — target set's required (non-spare) parts vs the user's owned inventory (loose parts + owned/built/in-progress sets); per part+color `required`/`owned`/`missing` plus `completionPercentage`. `404` if set or inventory not imported. |
+
 ## Error Handling
 
 All errors flow through `GlobalExceptionHandler` (`@RestControllerAdvice`).
