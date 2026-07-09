@@ -50,6 +50,9 @@ jobs:
           POSTGRES_DB: brickdeck
           POSTGRES_USER: brickdeck
           POSTGRES_PASSWORD: brickdeck
+          # Tests mock external HTTP; the Rebrickable client bean only needs a
+          # non-blank key to instantiate. Dummy value, not a real secret.
+          REBRICKABLE_API_KEY: ci-dummy-key
 
   frontend:
     name: Frontend (apps/web)
