@@ -1,369 +1,107 @@
 # BrickDeck
 
-BrickDeck is a LEGO collection intelligence platform designed to help collectors, builders, and hobbyists organize sets, classify loose pieces, compare set versions, discover build possibilities, and track deals across stores.
+**BrickDeck** is a LEGO collection intelligence platform. It helps collectors and
+builders search LEGO sets, view full parts inventories, catalog owned sets and
+loose pieces, and — over time — compare sets, find missing pieces, and track deals.
 
-The long-term goal is to combine structured LEGO catalog data, personal inventory management, price tracking, and AI-assisted piece recognition into a practical product that can evolve from a personal side project into a commercial SaaS platform.
+> Personal/portfolio project built with production conventions, on a path toward a
+> possible SaaS product.
 
----
+## Features
 
-## Vision
+- **Set search & details** — Rebrickable-backed search with local caching.
+- **Set parts inventory** — import and browse a set's full parts list (part, color, quantity).
+- **Authentication** — email/password with stateless JWT.
+- **Collection — owned sets** — track status, purchase price, and date.
+- **Collection — loose parts** — track quantity by part + color and storage location.
 
-Most LEGO collectors eventually face the same problems:
+Planned: missing-pieces engine, set comparison, build recommendations, price
+tracking, and AI-assisted piece recognition. See [docs/product/features.md](docs/product/features.md).
 
-- They own sets but do not know exactly which pieces they have.
-- They have loose pieces but do not know what sets or builds they belong to.
-- They want to know whether a new set is actually worth buying compared with a previous version.
-- They want to discover what they can build with leftover pieces.
-- They want alerts when a set has a real discount.
-- They need a better way to organize, classify, and understand their collection.
+## Tech Stack
 
-BrickDeck aims to solve this with a combination of catalog APIs, local inventory data, comparison logic, recommendation algorithms, and AI.
+| Area | Stack |
+| --- | --- |
+| Backend | Java 21, Spring Boot 3, Spring Data JPA, Spring Security, Bean Validation |
+| Database | PostgreSQL 16, Flyway |
+| Frontend | Next.js (App Router), React 19, TypeScript, MUI + Emotion, TanStack Query, React Hook Form + Zod |
+| External data | Rebrickable API |
+| Testing | JUnit 5, Mockito, MockMvc, Testcontainers · Vitest + React Testing Library |
+| Local infra | Docker Compose |
 
----
+## Architecture (high level)
 
-## Core Features
-
-### 1. Collection Management
-
-Users can register the LEGO sets they own, including quantity, condition, purchase price, store, purchase date, and status.
-
-Possible statuses:
-
-- Owned
-- Wishlist
-- Missing pieces
-- For sale
-- Sold
-- In progress
-- Archived
-
----
-
-### 2. Set Inventory Import
-
-BrickDeck should integrate with public LEGO catalog data providers such as Rebrickable and, potentially, BrickLink or Brickset.
-
-Main imported data:
-
-- Set number
-- Set name
-- Theme
-- Year
-- Piece count
-- Minifigures
-- Colors
-- Part inventory
-- Alternate builds or related MOCs when available
-
----
-
-### 3. Loose Piece Inventory
-
-Users can register loose pieces manually or through AI-assisted image recognition.
-
-Tracked piece attributes:
-
-- Part number
-- Part name
-- Color
-- Quantity
-- Condition
-- Storage location
-- Source set, when known
-- Notes
-
----
-
-### 4. Build Recommendation Engine
-
-Given the user's loose pieces and owned sets, BrickDeck should recommend:
-
-- Sets the user can fully rebuild
-- Sets the user can almost rebuild
-- Missing pieces required to complete a set
-- MOCs that can be built with existing pieces
-- Similar builds based on available inventory
-
----
-
-### 5. Set Comparison
-
-BrickDeck should allow users to compare different versions of similar sets, for example:
-
-- 2023 version vs 2025 version
-- Previous generation vs current generation
-- Similar sets from the same theme
-- Original vs re-release
-
-Comparison metrics:
-
-- Piece count
-- Price
-- Price per piece
-- Shared pieces
-- Unique pieces
-- Color differences
-- Minifigure differences
-- Build similarity score
-- Exclusive or rare pieces
-- Visual/design notes
-- Release year
-- Estimated value
-
----
-
-### 6. Price Tracking and Deals
-
-BrickDeck should track prices across supported stores and notify users when a set has a real discount.
-
-Possible sources:
-
-- Official LEGO Store
-- Amazon
-- Walmart
-- Liverpool
-- Mercado Libre
-- BrickLink
-- Other regional stores, where legally and technically allowed
-
-Important: scraping should respect each site's Terms of Service and robots.txt. Prefer official APIs, affiliate APIs, or lightweight public price checks when possible.
-
----
-
-### 7. AI-Assisted Piece Recognition
-
-Future AI functionality can help users classify pieces from photos.
-
-Possible AI capabilities:
-
-- Detect a single LEGO piece from an image
-- Detect color and part type
-- Suggest likely part IDs
-- Detect multiple pieces in a photo
-- Group pieces by type or color
-- Suggest storage categories
-- Recommend possible sets based on detected pieces
-
-This should be treated as an advanced feature after the core catalog and inventory system are stable.
-
----
-
-## Suggested Tech Stack
-
-### Frontend
-
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-
-### Backend
-
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- Spring Batch, optional for catalog sync jobs
-
-### Database
-
-- PostgreSQL 16+
-- Flyway for migrations
-
-### Infrastructure
-
-- Docker Compose for local development
-- GitHub Actions for CI
-- Dependabot for dependency updates
-- SonarQube or SonarCloud for quality checks
-
-### AI / ML
-
-- Python service for image processing and ML experiments
-- OpenCV for preprocessing
-- PyTorch or TensorFlow for model experiments
-- Vector embeddings for similarity search
-- Optional dedicated ML microservice once needed
-
----
-
-## Proposed Architecture
+Next.js web app → Spring Boot REST API → PostgreSQL, with Rebrickable as the
+cache-first external catalog source. Backend follows DDD + hexagonal packaging.
 
 ```text
-brickdeck/
-├── apps/
-│   └── web/                  # Next.js frontend
-├── services/
-│   ├── api/                  # Spring Boot backend
-│   └── ai-service/           # Optional Python AI service
-├── packages/
-│   └── shared/               # Shared types, schemas, constants
-├── docs/                     # Documentation and planning
-├── infra/                    # Docker, deployment, scripts
-├── postman/                  # API collections
-└── README.md
+apps/
+  api/   # Spring Boot backend (Java 21, Maven)
+  web/   # Next.js frontend (React, TypeScript, MUI)
+docs/    # Documentation (docs-as-code)
 ```
 
----
+Details: [docs/architecture/overview.md](docs/architecture/overview.md).
 
-## Initial Domain Model
+## Quick Start
 
-Core entities:
+```bash
+# 1. Environment
+cp .env.example .env                 # set REBRICKABLE_API_KEY and a strong JWT_SECRET
+cp apps/web/.env.example apps/web/.env
 
-- User
-- Collection
-- Set
-- Theme
-- Part
-- Color
-- SetInventory
-- UserSet
-- UserPart
-- Store
-- PriceSnapshot
-- DealAlert
-- SetComparison
-- BuildRecommendation
+# 2. Database (PostgreSQL 16 on localhost:5433)
+docker compose up -d
 
----
+# 3. Backend  -> http://localhost:8080
+cd apps/api && ./mvnw spring-boot:run
 
-## MVP Scope
+# 4. Frontend -> http://localhost:3000
+cd apps/web && npm install && npm run dev
+```
 
-The first version should avoid overbuilding. The goal is to deliver a working product that proves the core idea.
+Full guide: [docs/development/setup.md](docs/development/setup.md).
 
-### MVP Features
+## Main Commands
 
-- User can search LEGO sets.
-- User can save sets to their collection.
-- User can view the full inventory of a set.
-- User can manually register loose pieces.
-- User can compare two sets.
-- User can see missing pieces needed to complete a set.
-- User can receive simple build recommendations based on owned pieces.
-- Admin/catalog job can sync selected sets and parts from external APIs.
+```bash
+# Backend (from apps/api)
+./mvnw spring-boot:run                # run API
+./mvnw clean verify                   # build + all tests (needs PostgreSQL on 5433)
 
-### Not MVP Yet
+# Frontend (from apps/web)
+npm run dev                           # dev server
+npm run test                          # Vitest
+npm run typecheck && npm run lint     # quality
+```
 
-- Full AI image recognition
-- Aggressive scraping
-- Marketplace transactions
-- Public social features
-- Mobile app
-- Advanced monetization
+- API health: <http://localhost:8080/api/v1/health>
+- Swagger UI: <http://localhost:8080/swagger-ui/index.html>
 
----
+## Documentation
 
-## Roadmap
+Everything lives under [`docs/`](docs/README.md):
 
-### Phase 0 — Project Setup
+- [Product](docs/product/vision.md) — vision, roadmap, features, FDDs
+- [Architecture](docs/architecture/overview.md) — overview, technical/data/API design, diagrams
+- [Decisions](docs/decisions/) — ADRs
+- [API](docs/api/README.md) — OpenAPI, conventions, errors, examples
+- [Testing](docs/testing/testing-strategy.md) — strategy and plan
+- [Development](docs/development/setup.md) — setup, env vars, standards, contribution
 
-- Create repository
-- Add README, roadmap, architecture, and Claude configuration
-- Define stack and folder structure
-- Configure Docker Compose
-- Configure backend and frontend base projects
-- Add CI pipeline
+## Project Status
 
-### Phase 1 — Catalog Foundation
+**Phase 2 — User Collection (backend complete).** Catalog foundation (Phase 1)
+shipped; collection backend (auth, owned sets, loose parts) done. In progress:
+frontend auth wiring, then collection UI.
 
-- Integrate external catalog API
-- Create database schema for sets, parts, colors, and inventories
-- Add catalog search
-- Add set detail page
-- Add catalog sync jobs
+Roadmap: [docs/product/roadmap.md](docs/product/roadmap.md).
 
-### Phase 2 — User Collection
+## Contributing
 
-- Add authentication
-- Add user collections
-- Add owned sets
-- Add wishlist
-- Add manual loose piece inventory
-- Add missing piece calculation
-
-### Phase 3 — Set Comparison
-
-- Compare two sets by metadata
-- Compare inventories
-- Calculate shared and unique parts
-- Calculate similarity score
-- Show version differences clearly
-
-### Phase 4 — Build Recommendations
-
-- Recommend sets users can complete
-- Recommend sets with few missing pieces
-- Recommend MOCs or alternate builds when data is available
-- Show required missing parts
-
-### Phase 5 — Price Tracking
-
-- Add store model
-- Add price snapshots
-- Add price history
-- Add deal alerts
-- Integrate safe sources first
-- Evaluate scraping only where allowed
-
-### Phase 6 — AI Features
-
-- Build image dataset strategy
-- Add piece recognition prototype
-- Add AI-assisted classification
-- Add confidence scoring
-- Add human confirmation flow
-- Improve recommendations using AI explanations
-
-### Phase 7 — Productization
-
-- Add subscription tiers
-- Add user limits
-- Add premium AI features
-- Add notifications
-- Add analytics
-- Add deployment pipeline
-
----
-
-## Monetization Ideas
-
-Possible future monetization:
-
-- Free tier for small collections
-- Premium tier for large collections
-- AI piece recognition as premium feature
-- Deal alerts as premium feature
-- Advanced comparison reports
-- Affiliate links for stores
-- Collector valuation dashboard
-
----
-
-## Product Positioning
-
-BrickDeck is not just a LEGO catalog.
-
-It should be positioned as:
-
-> A smart LEGO collection assistant that helps you organize your pieces, compare sets, discover what you can build, and buy smarter.
-
----
-
-## Development Principles
-
-- Start with useful catalog and collection features before AI.
-- Keep external API integrations isolated.
-- Cache external data locally.
-- Respect store and marketplace Terms of Service.
-- Avoid storing unnecessary user data.
-- Build with productization in mind, but keep the MVP simple.
-- Prefer clean architecture over quick hacks.
-- Document decisions early.
-
----
+Git-flow (`develop` is the default branch), Conventional Commits, tests with every
+change. See [docs/development/contribution-guide.md](docs/development/contribution-guide.md).
 
 ## License
 
-To be defined.
+TODO — not yet defined.
