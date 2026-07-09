@@ -33,7 +33,7 @@ See FDDs: [authentication](./fdd/authentication-fdd.md),
 
 | Feature | Status | Notes |
 | --- | --- | --- |
-| Missing-pieces engine | In progress | Backend done: `GET /sets/{setNumber}/missing-parts` — required vs owned (loose + owned sets), completion %. Frontend view pending. See [FDD](./fdd/missing-pieces-fdd.md). |
+| Missing-pieces engine | In progress | Backend + frontend done: `GET /sets/{setNumber}/missing-parts` (required vs owned = loose + owned sets, completion %) and a "Missing pieces" panel on the set-detail page. Remaining: only-missing filter + pagination (3b). See [FDD](./fdd/missing-pieces-fdd.md). |
 | Set comparison engine | Planned | Version diff, shared/unique parts, similarity score. |
 | Build recommendation engine | Planned | Buildable / almost-buildable sets from inventory. |
 | Price tracking & deals | Planned | API/feed-based; no aggressive scraping. |
