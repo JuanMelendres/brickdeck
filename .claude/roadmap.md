@@ -40,13 +40,13 @@ Decomposed into 2a (auth) → 2b (add-set) → 2c (loose pieces). Auth = JWT sta
 
 ## Phase 3 — Missing Pieces Engine
 
-Status: In Progress
+Status: Done (core)
 
 - 3a backend engine + endpoint — Done: `GET /api/v1/sets/{setNumber}/missing-parts` (authenticated) compares a target set's required (non-spare) inventory vs the user's owned inventory (loose parts + parts of owned/built/in-progress sets); returns per part+color required/owned/missing plus completion percentage. 404 if set or inventory not imported.
 - 3c frontend — Done: "Missing pieces" panel on the set-detail page (`/sets/[setNumber]`) — completion bar + per-part required/owned/missing table; auth-gated (prompts login when signed out; prompts inventory import on 404).
-- 3b richer report — Not started: only-missing filter, pagination, spare policy options.
+- 3b richer report — Done: `missingOnly` filter + line pagination (`page`/`size`, `totalPages`, `first`/`last`), `missingLineCount`; whole-set totals unchanged. Frontend: "Only missing" toggle + prev/next paging. (Configurable spare policy dropped — fixed documented rule.)
 
-Owned = loose parts (`user_parts`) + parts of collection sets with status OWNED/BUILT/IN_PROGRESS (WISHLIST excluded); spares count toward owned but not toward required.
+Success criterion met: a user can see exactly how close they are to completing a set. Owned = loose parts (`user_parts`) + parts of collection sets with status OWNED/BUILT/IN_PROGRESS (WISHLIST excluded); spares count toward owned but not toward required.
 
 ## Phase 4 — Set Comparison Engine
 

@@ -21,5 +21,12 @@ export interface MissingPartsReport {
   totalOwned: number;
   totalMissing: number;
   completionPercentage: number;
+  missingLineCount: number;
   lines: MissingPartLine[];
+  page: number;
+  size: number;
+  totalLines: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
 }

@@ -160,6 +160,9 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters:
         - { name: setNumber, in: path, required: true, schema: { type: string } }
+        - { name: missingOnly, in: query, schema: { type: boolean, default: false } }
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 50 } }
       responses:
         "200":
           description: OK
@@ -394,9 +397,16 @@ components:
         totalOwned: { type: integer }
         totalMissing: { type: integer }
         completionPercentage: { type: number, format: double }
+        missingLineCount: { type: integer }
         lines:
           type: array
           items: { $ref: "#/components/schemas/MissingPartLine" }
+        page: { type: integer }
+        size: { type: integer }
+        totalLines: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
     AddUserSetRequest:
       type: object
       required: [setNumber]

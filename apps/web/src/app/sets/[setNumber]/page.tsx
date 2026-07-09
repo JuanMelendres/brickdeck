@@ -34,6 +34,8 @@ export default function SetDetailPage() {
   const setNumber = params.setNumber;
 
   const [partsPage, setPartsPage] = useState(0);
+  const [missingOnly, setMissingOnly] = useState(false);
+  const [missingPage, setMissingPage] = useState(0);
 
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
@@ -41,7 +43,15 @@ export default function SetDetailPage() {
   const detail = useSetDetail(setNumber);
   const parts = useSetParts(setNumber, partsPage, PARTS_PAGE_SIZE);
   const importInventory = useImportInventory(setNumber);
-  const missingParts = useMissingParts(setNumber, isAuthenticated);
+  const missingParts = useMissingParts(setNumber, isAuthenticated, {
+    missingOnly,
+    page: missingPage,
+  });
+
+  const handleMissingOnlyChange = (value: boolean) => {
+    setMissingOnly(value);
+    setMissingPage(0);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -89,6 +99,9 @@ export default function SetDetailPage() {
             isError={missingParts.isError}
             error={missingParts.error}
             report={missingParts.data}
+            missingOnly={missingOnly}
+            onMissingOnlyChange={handleMissingOnlyChange}
+            onPageChange={setMissingPage}
           />
         </Box>
       </Stack>
