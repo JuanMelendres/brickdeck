@@ -12,16 +12,26 @@ import {
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { AddSetToCollectionForm } from "@/features/collection/AddSetToCollectionForm";
 import { CollectionSetsList } from "@/features/collection/CollectionSetsList";
+import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollectionForm";
+import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
 import {
   useAddCollectionSet,
   useCollectionSets,
   useRemoveCollectionSet,
 } from "@/features/collection/collectionSetsHooks";
-import type { AddUserSetRequest } from "@/lib/types/collection";
+import {
+  useAddCollectionPart,
+  useCollectionParts,
+  useRemoveCollectionPart,
+} from "@/features/collection/collectionPartsHooks";
+import type {
+  AddUserPartRequest,
+  AddUserSetRequest,
+} from "@/lib/types/collection";
 
 const PAGE_SIZE = 20;
 
-function CollectionContent() {
+function OwnedSetsSection() {
   const [page] = useState(0);
   const { data, isLoading, isError, error } = useCollectionSets(page, PAGE_SIZE);
   const addSet = useAddCollectionSet();
@@ -32,33 +42,85 @@ function CollectionContent() {
   };
 
   return (
+    <Stack spacing={2}>
+      <Typography variant="h5" component="h2">
+        Owned sets
+      </Typography>
+      <AddSetToCollectionForm onSubmit={handleAdd} />
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress aria-label="Loading" />
+        </Box>
+      )}
+      {isError && (
+        <Alert severity="error">
+          {error instanceof Error
+            ? error.message
+            : "Failed to load your sets."}
+        </Alert>
+      )}
+      {data && (
+        <CollectionSetsList
+          sets={data.content}
+          onRemove={(id) => removeSet.mutate(id)}
+          removingId={removeSet.isPending ? removeSet.variables : null}
+        />
+      )}
+    </Stack>
+  );
+}
+
+function LoosePartsSection() {
+  const [page] = useState(0);
+  const { data, isLoading, isError, error } = useCollectionParts(
+    page,
+    PAGE_SIZE,
+  );
+  const addPart = useAddCollectionPart();
+  const removePart = useRemoveCollectionPart();
+
+  const handleAdd = async (values: AddUserPartRequest) => {
+    await addPart.mutateAsync(values);
+  };
+
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h5" component="h2">
+        Loose parts
+      </Typography>
+      <AddPartToCollectionForm onSubmit={handleAdd} />
+      {isLoading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress aria-label="Loading" />
+        </Box>
+      )}
+      {isError && (
+        <Alert severity="error">
+          {error instanceof Error
+            ? error.message
+            : "Failed to load your parts."}
+        </Alert>
+      )}
+      {data && (
+        <CollectionPartsList
+          parts={data.content}
+          onRemove={(id) => removePart.mutate(id)}
+          removingId={removePart.isPending ? removePart.variables : null}
+        />
+      )}
+    </Stack>
+  );
+}
+
+function CollectionContent() {
+  return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Stack spacing={4}>
+      <Stack spacing={6}>
         <Typography variant="h4" component="h1">
           My collection
         </Typography>
-
-        <AddSetToCollectionForm onSubmit={handleAdd} />
-
-        {isLoading && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress aria-label="Loading" />
-          </Box>
-        )}
-        {isError && (
-          <Alert severity="error">
-            {error instanceof Error
-              ? error.message
-              : "Failed to load your collection."}
-          </Alert>
-        )}
-        {data && (
-          <CollectionSetsList
-            sets={data.content}
-            onRemove={(id) => removeSet.mutate(id)}
-            removingId={removeSet.isPending ? removeSet.variables : null}
-          />
-        )}
+        <OwnedSetsSection />
+        <LoosePartsSection />
       </Stack>
     </Container>
   );

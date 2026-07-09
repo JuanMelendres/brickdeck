@@ -1,7 +1,9 @@
 import { apiDelete, apiGet, apiPost } from "./client";
 import type { PageResponse } from "@/lib/types/api";
 import type {
+  AddUserPartRequest,
   AddUserSetRequest,
+  UserPartResponse,
   UserSetResponse,
 } from "@/lib/types/collection";
 
@@ -26,4 +28,27 @@ export function addCollectionSet(
 /** Remove a collection set by id. */
 export function removeCollectionSet(id: string): Promise<void> {
   return apiDelete(`/api/v1/collection/sets/${id}`);
+}
+
+/** List the authenticated user's loose parts (paginated). */
+export function listCollectionParts(
+  page: number,
+  size: number,
+): Promise<PageResponse<UserPartResponse>> {
+  return apiGet<PageResponse<UserPartResponse>>("/api/v1/collection/parts", {
+    page,
+    size,
+  });
+}
+
+/** Add a loose part to the collection. */
+export function addCollectionPart(
+  request: AddUserPartRequest,
+): Promise<UserPartResponse> {
+  return apiPost<UserPartResponse>("/api/v1/collection/parts", request);
+}
+
+/** Remove a loose part by id. */
+export function removeCollectionPart(id: string): Promise<void> {
+  return apiDelete(`/api/v1/collection/parts/${id}`);
 }

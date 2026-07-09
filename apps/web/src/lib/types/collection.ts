@@ -36,3 +36,27 @@ export interface UpdateUserSetRequest {
   purchasePrice?: number;
   purchaseDate?: string;
 }
+
+export interface UserPartResponse {
+  id: string;
+  partNumber: string | null;
+  partName: string | null;
+  partImageUrl: string | null;
+  colorExternalId: number | null;
+  colorName: string | null;
+  colorRgb: string | null;
+  quantity: number | null;
+  storageLocation: string | null;
+}
+
+export interface AddUserPartRequest {
+  externalPartNumber: string;
+  colorExternalId: number;
+  quantity: number;
+  storageLocation?: string;
+}
+
+export interface UpdateUserPartRequest {
+  quantity?: number;
+  storageLocation?: string;
+}
