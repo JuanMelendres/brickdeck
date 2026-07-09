@@ -73,13 +73,15 @@ class MissingPartsIntegrationTest {
         // User owns the owned set.
         userSet(user, ownedSet, CollectionStatus.OWNED);
 
-        MissingPartsReport report =
-                missingPartsService.computeMissingParts(targetSet.getExternalSetNumber(), user.getId());
+        MissingPartsReport report = missingPartsService.computeMissingParts(
+                targetSet.getExternalSetNumber(), user.getId(), false, 0, 50);
 
         assertThat(report.totalRequired()).isEqualTo(6);
         assertThat(report.totalOwned()).isEqualTo(4);
         assertThat(report.totalMissing()).isEqualTo(2);
         assertThat(report.completionPercentage()).isEqualTo(66.7);
+        assertThat(report.missingLineCount()).isEqualTo(1);
+        assertThat(report.totalLines()).isEqualTo(2);
         assertThat(report.lines()).hasSize(2);
 
         var p1Line = report.lines().stream()

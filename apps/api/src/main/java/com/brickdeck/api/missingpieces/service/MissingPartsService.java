@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -46,13 +47,21 @@ public class MissingPartsService {
         this.ownedInventoryRepository = ownedInventoryRepository;
     }
 
+    /** Lines ordered by most-missing first, then part number, then color. */
+    private static final Comparator<MissingPartLine> LINE_ORDER =
+            Comparator.comparingInt(MissingPartLine::missing).reversed()
+                    .thenComparing(l -> l.partNumber() == null ? "" : l.partNumber())
+                    .thenComparing(l -> l.colorExternalId() == null ? Integer.MIN_VALUE : l.colorExternalId());
+
     /**
      * Compare a target set's required (non-spare) inventory against the user's
      * owned inventory (loose parts plus the parts of owned sets) and report
-     * missing pieces and completion percentage.
+     * missing pieces and completion percentage. Totals are whole-set; the
+     * returned lines are optionally filtered to missing-only and paginated.
      */
     @Transactional(readOnly = true)
-    public MissingPartsReport computeMissingParts(String setNumber, UUID userId) {
+    public MissingPartsReport computeMissingParts(
+            String setNumber, UUID userId, boolean missingOnly, int page, int size) {
         String normalized = SetNumbers.normalize(setNumber);
 
         brickSetRepository.findByExternalSetNumber(normalized)
@@ -106,8 +115,29 @@ public class MissingPartsService {
                 ? 100.0
                 : Math.round(totalOwned * 1000.0 / totalRequired) / 10.0;
 
+        int missingLineCount = (int) lines.stream().filter(l -> l.missing() > 0).count();
+
+        List<MissingPartLine> filtered = lines.stream()
+                .filter(l -> !missingOnly || l.missing() > 0)
+                .sorted(LINE_ORDER)
+                .toList();
+
+        int safeSize = size <= 0 ? 50 : size;
+        int safePage = Math.max(0, page);
+        long totalLines = filtered.size();
+        int totalPages = (int) Math.ceil((double) totalLines / safeSize);
+
+        int from = Math.min(safePage * safeSize, filtered.size());
+        int to = Math.min(from + safeSize, filtered.size());
+        List<MissingPartLine> pageLines = List.copyOf(filtered.subList(from, to));
+
+        boolean first = safePage == 0;
+        boolean last = to >= filtered.size();
+
         return new MissingPartsReport(
-                normalized, totalRequired, totalOwned, totalMissing, completion, lines);
+                normalized, totalRequired, totalOwned, totalMissing, completion,
+                missingLineCount, pageLines, safePage, safeSize, totalLines, totalPages,
+                first, last);
     }
 
     private void accumulate(Map<PartColorKey, Long> owned, List<PartColorQuantity> rows) {

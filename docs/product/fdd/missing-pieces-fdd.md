@@ -16,8 +16,10 @@ Authenticated users.
 ## Functional Requirements
 - FR-001: `GET /api/v1/sets/{setNumber}/missing-parts` (authenticated) returns a `MissingPartsReport`.
 - FR-002: For each required part+color: `required`, `owned`, `missing`.
-- FR-003: Report includes `totalRequired`, `totalOwned`, `totalMissing`, and `completionPercentage`.
+- FR-003: Report includes `totalRequired`, `totalOwned`, `totalMissing`, `missingLineCount`, and `completionPercentage`.
 - FR-004: `404` when the target set or its inventory is not imported.
+- FR-005: `missingOnly` query param returns only lines with `missing > 0`.
+- FR-006: `lines` are paginated (`page`, `size`, `totalLines`, `totalPages`, `first`, `last`); totals stay whole-set regardless of filter/page.
 
 ## Business Rules
 - BR-001: Required = the target set's **non-spare** inventory lines.
@@ -38,9 +40,8 @@ Authenticated users.
 - User owns nothing: completion 0 percent, all parts missing.
 
 ## Out of Scope
-- Filtering to only-missing lines and pagination (planned: 3b).
-- Frontend "Missing pieces" view (planned: 3c).
 - Suggesting where to buy missing parts.
+- Building more than one copy of the set.
 
 ## Open Questions
 - Should quantity beyond a single copy of the set (building two of a set) be supported?

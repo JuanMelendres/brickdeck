@@ -68,13 +68,18 @@ class MissingPartsServiceTest {
         when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
                 .thenReturn(List.of(pcq(partA, red, 1), pcq(partB, blue, 2)));
 
-        MissingPartsReport report = service.computeMissingParts("75257-1", userId);
+        MissingPartsReport report = service.computeMissingParts("75257-1", userId, false, 0, 50);
 
         assertThat(report.setNumber()).isEqualTo("75257-1");
         assertThat(report.totalRequired()).isEqualTo(6);
         assertThat(report.totalOwned()).isEqualTo(4);
         assertThat(report.totalMissing()).isEqualTo(2);
         assertThat(report.completionPercentage()).isEqualTo(66.7);
+        assertThat(report.missingLineCount()).isEqualTo(1);
+        assertThat(report.totalLines()).isEqualTo(2);
+        assertThat(report.totalPages()).isEqualTo(1);
+        assertThat(report.first()).isTrue();
+        assertThat(report.last()).isTrue();
         assertThat(report.lines()).hasSize(2);
 
         var lineA = report.lines().stream()
@@ -96,7 +101,7 @@ class MissingPartsServiceTest {
         when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
                 .thenReturn(List.of());
 
-        MissingPartsReport report = service.computeMissingParts("100-1", userId);
+        MissingPartsReport report = service.computeMissingParts("100-1", userId, false, 0, 50);
 
         assertThat(report.totalMissing()).isZero();
         assertThat(report.totalOwned()).isEqualTo(2);
@@ -104,10 +109,55 @@ class MissingPartsServiceTest {
     }
 
     @Test
+    void missingOnlyFilterReturnsOnlyIncompleteLines() {
+        when(brickSetRepository.findByExternalSetNumber("200-1"))
+                .thenReturn(Optional.of(new BrickSet()));
+        when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("200-1"))
+                .thenReturn(List.of(setPart(partA, red, 4), setPart(partB, blue, 2)));
+        when(ownedInventoryRepository.sumLoosePartsByUser(userId))
+                .thenReturn(List.of(pcq(partB, blue, 2))); // partB complete, partA missing
+        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
+                .thenReturn(List.of());
+
+        MissingPartsReport report = service.computeMissingParts("200-1", userId, true, 0, 50);
+
+        assertThat(report.totalRequired()).isEqualTo(6); // whole-set, unaffected by filter
+        assertThat(report.missingLineCount()).isEqualTo(1);
+        assertThat(report.totalLines()).isEqualTo(1);
+        assertThat(report.lines()).hasSize(1);
+        assertThat(report.lines().get(0).partNumber()).isEqualTo("3001");
+    }
+
+    @Test
+    void paginatesLines() {
+        when(brickSetRepository.findByExternalSetNumber("300-1"))
+                .thenReturn(Optional.of(new BrickSet()));
+        when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("300-1"))
+                .thenReturn(List.of(setPart(partA, red, 4), setPart(partB, blue, 2)));
+        when(ownedInventoryRepository.sumLoosePartsByUser(userId)).thenReturn(List.of());
+        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
+                .thenReturn(List.of());
+
+        MissingPartsReport page0 = service.computeMissingParts("300-1", userId, false, 0, 1);
+        assertThat(page0.lines()).hasSize(1);
+        assertThat(page0.totalLines()).isEqualTo(2);
+        assertThat(page0.totalPages()).isEqualTo(2);
+        assertThat(page0.first()).isTrue();
+        assertThat(page0.last()).isFalse();
+
+        MissingPartsReport page1 = service.computeMissingParts("300-1", userId, false, 1, 1);
+        assertThat(page1.lines()).hasSize(1);
+        assertThat(page1.first()).isFalse();
+        assertThat(page1.last()).isTrue();
+        assertThat(page1.lines().get(0).partNumber())
+                .isNotEqualTo(page0.lines().get(0).partNumber());
+    }
+
+    @Test
     void throwsWhenSetNotImported() {
         when(brickSetRepository.findByExternalSetNumber("999-1")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.computeMissingParts("999-1", userId))
+        assertThatThrownBy(() -> service.computeMissingParts("999-1", userId, false, 0, 50))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Set not imported");
     }
@@ -119,7 +169,7 @@ class MissingPartsServiceTest {
         when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("555-1"))
                 .thenReturn(List.of());
 
-        assertThatThrownBy(() -> service.computeMissingParts("555-1", userId))
+        assertThatThrownBy(() -> service.computeMissingParts("555-1", userId, false, 0, 50))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("inventory not imported");
     }

@@ -4,10 +4,13 @@ import NextLink from "next/link";
 import {
   Alert,
   Box,
+  Button,
+  FormControlLabel,
   LinearProgress,
   Link,
   Paper,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -25,6 +28,9 @@ interface MissingPartsPanelProps {
   isError: boolean;
   error: unknown;
   report: MissingPartsReport | undefined;
+  missingOnly: boolean;
+  onMissingOnlyChange: (value: boolean) => void;
+  onPageChange: (page: number) => void;
 }
 
 export function MissingPartsPanel({
@@ -33,6 +39,9 @@ export function MissingPartsPanel({
   isError,
   error,
   report,
+  missingOnly,
+  onMissingOnlyChange,
+  onPageChange,
 }: MissingPartsPanelProps) {
   if (!isAuthenticated) {
     return (
@@ -45,6 +54,30 @@ export function MissingPartsPanel({
     );
   }
 
+  return (
+    <Stack spacing={2}>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={missingOnly}
+            onChange={(event) => onMissingOnlyChange(event.target.checked)}
+            slotProps={{ input: { "aria-label": "Only missing" } }}
+          />
+        }
+        label="Only missing"
+      />
+      {renderContent(isLoading, isError, error, report, onPageChange)}
+    </Stack>
+  );
+}
+
+function renderContent(
+  isLoading: boolean,
+  isError: boolean,
+  error: unknown,
+  report: MissingPartsReport | undefined,
+  onPageChange: (page: number) => void,
+) {
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -95,41 +128,73 @@ export function MissingPartsPanel({
         />
       </Box>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Part</TableCell>
-              <TableCell>Number</TableCell>
-              <TableCell>Color</TableCell>
-              <TableCell align="right">Required</TableCell>
-              <TableCell align="right">Owned</TableCell>
-              <TableCell align="right">Missing</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {report.lines.map((line, index) => (
-              <TableRow
-                key={`${line.partNumber}-${line.colorExternalId}-${index}`}
-                sx={
-                  line.missing > 0
-                    ? { backgroundColor: "action.hover" }
-                    : undefined
-                }
-              >
-                <TableCell>{line.partName ?? "—"}</TableCell>
-                <TableCell>{line.partNumber ?? "—"}</TableCell>
-                <TableCell>{line.colorName ?? "—"}</TableCell>
-                <TableCell align="right">{line.required}</TableCell>
-                <TableCell align="right">{line.owned}</TableCell>
-                <TableCell align="right">
-                  {line.missing > 0 ? `${line.missing} missing` : "0"}
-                </TableCell>
+      {report.lines.length === 0 ? (
+        <Typography color="text.secondary">
+          No pieces to show for this filter.
+        </Typography>
+      ) : (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Part</TableCell>
+                <TableCell>Number</TableCell>
+                <TableCell>Color</TableCell>
+                <TableCell align="right">Required</TableCell>
+                <TableCell align="right">Owned</TableCell>
+                <TableCell align="right">Missing</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {report.lines.map((line, index) => (
+                <TableRow
+                  key={`${line.partNumber}-${line.colorExternalId}-${index}`}
+                  sx={
+                    line.missing > 0
+                      ? { backgroundColor: "action.hover" }
+                      : undefined
+                  }
+                >
+                  <TableCell>{line.partName ?? "—"}</TableCell>
+                  <TableCell>{line.partNumber ?? "—"}</TableCell>
+                  <TableCell>{line.colorName ?? "—"}</TableCell>
+                  <TableCell align="right">{line.required}</TableCell>
+                  <TableCell align="right">{line.owned}</TableCell>
+                  <TableCell align="right">
+                    {line.missing > 0 ? `${line.missing} missing` : "0"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {report.totalPages > 1 && (
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ justifyContent: "center", alignItems: "center" }}
+        >
+          <Button
+            size="small"
+            disabled={report.first}
+            onClick={() => onPageChange(report.page - 1)}
+          >
+            Previous
+          </Button>
+          <Typography variant="body2">
+            Page {report.page + 1} of {report.totalPages}
+          </Typography>
+          <Button
+            size="small"
+            disabled={report.last}
+            onClick={() => onPageChange(report.page + 1)}
+          >
+            Next
+          </Button>
+        </Stack>
+      )}
     </Stack>
   );
 }

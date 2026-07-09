@@ -8,8 +8,8 @@ export const queryKeys = {
     partsAll: (setNumber: string) => ["sets", "parts", setNumber] as const,
     parts: (setNumber: string, page: number, size: number) =>
       ["sets", "parts", setNumber, page, size] as const,
-    missingParts: (setNumber: string) =>
-      ["sets", "missing-parts", setNumber] as const,
+    missingParts: (setNumber: string, missingOnly: boolean, page: number) =>
+      ["sets", "missing-parts", setNumber, missingOnly, page] as const,
   },
   collection: {
     all: ["collection"] as const,
