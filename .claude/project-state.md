@@ -2,11 +2,11 @@
 
 ## Last Updated
 
-2026-07-08
+2026-07-09
 
 ## Current Phase
 
-Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done, 2b add-set-to-collection done (incl. PATCH/DELETE polish), 2c loose pieces done. Backend for Phase 2 complete; remaining is frontend auth + collection UI. Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types. Next: 2c loose pieces, then frontend auth wiring.
+Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collection) in progress: 2a auth foundation done, 2b add-set-to-collection done (incl. PATCH/DELETE polish), 2c loose pieces done. Backend for Phase 2 complete. Frontend auth wiring decomposed into 2d-1 (auth client layer — DONE), 2d-2 (login/register pages + AuthProvider + protected routes — IN PROGRESS), 2d-3 (nav/logout + collection UI — not started). Backend catalog done (Rebrickable client, theme/set import, lookup, search, inventory, CORS, OpenAPI). Frontend (`apps/web`) has MUI scaffold + set search + set-detail/parts pages + OpenAPI-derived types + auth client (token store, Bearer injection, login/register/me). Docs reorganized into docs-as-code tree (product/architecture/decisions/api/testing/development + ADRs). Next: finish 2d-2, then 2d-3 collection UI.
 
 ## Completed
 
@@ -38,6 +38,8 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Recently Worked On
 
+- Docs-as-code reorganization: `docs/` restructured into `product/` (vision, roadmap, features, `fdd/` × 5), `architecture/` (overview, technical-design, database-design, api-design, diagrams), `decisions/` (ADR-001..010), `api/` (static `openapi.yaml`, README, `postman/` TODO), `testing/` (strategy, test-plan, unit, integration), `development/` (setup, environment-variables, coding-standards, contribution-guide). Rewrote root README, added docs map to CLAUDE.md, added CHANGELOG. Corrected stale facts (services/api→apps/api, Tailwind→MUI, 5432→5433, Gradle→Maven). Removed superseded top-level docs after integrating; moved AI_STRATEGY/SCRAPING_POLICY/ROADMAP under `product/`. All relative links verified. Branch `docs/reorganize-docs-as-code`.
+- Phase 2d-1 frontend auth client layer (TDD): `lib/auth/tokenStore.ts` (SSR-safe JWT store, no-ops without `window`), `lib/api/auth.ts` (`login`/`register` persist token, `getMe`), `lib/types/auth.ts` (hand-written auth contract types), `lib/api/client.ts` now injects `Authorization: Bearer` and clears token on 401. Added in-memory localStorage polyfill to `vitest.setup.ts` (jsdom provides none). 43 web tests (+11); typecheck/lint/build green. Branch `feat/frontend-auth-client`. Token in `localStorage` = MVP trade-off (XSS-readable; ADR-008 flags httpOnly-cookie revisit).
 - Phase 2c loose pieces manual inventory (backend): V7 `user_parts` table (FK user+part+color, unique `(user_id, part_id, color_id)`, quantity, storage_location), `collection` — `UserPart` entity, `UserPartRepository` (`existsByUserIdAndPartIdAndColorId`, `findByUserId`/`findByIdAndUserId` +`@EntityGraph` part+color), `AddUserPartRequest`/`UpdateUserPartRequest`/`UserPartResponse`, `UserPartService`, `UserPartController` at `/api/v1/collection/parts` (`POST` 201+Location, `GET` `PageResponse` `@PageableDefault size=20 sort=createdAt DESC`, `PATCH` partial, `DELETE` 204). Part+color resolved from local catalog by `externalPartNumber`/`externalId` (must be pre-imported via a set's inventory — no single-part Rebrickable fetch exists; missing → 404); duplicate → 409; owner-scoped. Integration test seeds synthetic Part(`IT-PART-3001`)+Color(`999001`). 105 tests (+19). Branch `feat/collection-loose-pieces`.
 - Phase 2b polish (backend): `PATCH /api/v1/collection/sets/{id}` (partial update — non-null status/purchasePrice/purchaseDate applied, cannot clear to null; `UpdateUserSetRequest`) + `DELETE /api/v1/collection/sets/{id}` → 204. Owner-scoped via `UserSetRepository.findByIdAndUserId` (+`@EntityGraph`); missing or not-owned → `ResourceNotFoundException` 404 (no existence leak). Git-flow adopted: `develop` is now the default branch; features → develop → master. 86 tests (+9). Branch `feat/collection-2b-polish`.
 - Phase 2b add-set-to-collection (backend): V6 `user_sets` table (FK user+set, unique `(user_id, set_id)`, status/purchase_price/purchase_date), `collection` package — `UserSet` entity + `CollectionStatus` enum (OWNED/WISHLIST/BUILT/IN_PROGRESS), `UserSetRepository` (`existsByUserIdAndBrickSetId`, `findByUserId` + `@EntityGraph`), `AddUserSetRequest`/`UserSetResponse` DTOs, `CollectionService` (find-or-import target via new `BrickSetService.findOrImportEntity`, owner-scoped, dup→409), `CollectionController` (`POST` 201+Location, `GET` `PageResponse` `@PageableDefault size=20 sort=createdAt DESC`), `DuplicateCollectionEntryException`→409 in `GlobalExceptionHandler`. Controller WebMvcTest keeps default security filters (not `addFilters=false`) so `@AuthenticationPrincipal` resolves via `authentication()`/`csrf()` post-processors. Integration test seeds a synthetic set number for the cache-hit path (shared DB already holds real numbers). 77 tests (+10).
@@ -69,6 +71,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Immediate Next Steps
 
-1. Frontend auth wiring: login/register pages, token storage, Bearer on the API client, protected routes; then collection UI (sets + loose parts).
-2. Add Postman collection under `docs/postman` (now covers auth + collection sets/parts); mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
-3. Optional later: single-part find-or-import (`RebrickableClient.getPart/getColor`) so loose pieces can be added without pre-importing a set.
+1. Finish 2d-2 (in progress): `AuthProvider` + `useAuth` (React Context DI), login + register pages (RHF + Zod, map server 400 to fields), redirect-if-authed, and a protected-route wrapper. Then 2d-3: nav bar + logout, then collection UI (sets + loose parts).
+2. Add Postman collection under `docs/api/postman` (now covers auth + collection sets/parts); mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
+3. Add CI (GitHub Actions) — highest-value gap flagged in `docs/testing`; run `mvnw verify` + web test/typecheck/lint.
+4. Optional later: single-part find-or-import (`RebrickableClient.getPart/getColor`) so loose pieces can be added without pre-importing a set.

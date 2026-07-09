@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiGet, apiPost } from "./client";
+import { getToken, setToken } from "@/lib/auth/tokenStore";
 
 const jsonResponse = (body: unknown, status = 200): Response =>
   new Response(JSON.stringify(body), {
@@ -48,6 +49,23 @@ describe("apiGet", () => {
       ApiError,
     );
   });
+
+  it("captures validationErrors from a 400 body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse(
+        {
+          message: "Validation failed",
+          validationErrors: { email: "must be a well-formed email address" },
+        },
+        400,
+      ),
+    );
+
+    await expect(apiGet("/api/v1/auth/register")).rejects.toMatchObject({
+      status: 400,
+      validationErrors: { email: "must be a well-formed email address" },
+    });
+  });
 });
 
 describe("apiPost", () => {
@@ -78,5 +96,49 @@ describe("apiPost", () => {
     await expect(
       apiPost("/api/v1/catalog/sets/x/inventory/import"),
     ).rejects.toMatchObject({ status: 404, message: "Set not imported" });
+  });
+});
+
+describe("authorization header", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.localStorage.clear();
+  });
+
+  it("adds a Bearer Authorization header when a token is stored", async () => {
+    setToken("jwt-xyz");
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({ ok: true }));
+
+    await apiGet("/api/v1/auth/me");
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe("Bearer jwt-xyz");
+  });
+
+  it("omits the Authorization header when no token is stored", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({ content: [] }));
+
+    await apiGet("/api/v1/sets");
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBeUndefined();
+  });
+
+  it("clears the stored token on a 401 response", async () => {
+    setToken("jwt-expired");
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ message: "Unauthorized" }, 401),
+    );
+
+    await expect(apiGet("/api/v1/collection/sets")).rejects.toMatchObject({
+      status: 401,
+    });
+    expect(getToken()).toBeNull();
   });
 });
