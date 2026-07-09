@@ -14,6 +14,16 @@ vi.mock("next/navigation", () => ({
   useParams: () => ({ setNumber: "75257-1" }),
 }));
 
+vi.mock("@/features/auth/useAuth", () => ({
+  useAuth: () => ({
+    status: "unauthenticated",
+    user: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+  }),
+}));
+
 const set: BrickSetResponse = {
   id: "1",
   externalSetNumber: "75257-1",
@@ -73,5 +83,9 @@ describe("SetDetailPage", () => {
       await screen.findByRole("heading", { name: "Millennium Falcon" }),
     ).toBeInTheDocument();
     expect(await screen.findByText("Brick 2 x 4")).toBeInTheDocument();
+    // Missing-pieces section prompts unauthenticated users to log in.
+    expect(
+      await screen.findByRole("link", { name: /log in/i }),
+    ).toHaveAttribute("href", "/login");
   });
 });
