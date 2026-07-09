@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/lib/env";
+import { clearToken, getToken } from "@/lib/auth/tokenStore";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -40,12 +41,20 @@ async function extractMessage(response: Response): Promise<string> {
 }
 
 async function request<T>(url: string, init: RequestInit): Promise<T> {
+  const token = getToken();
+  const authHeader: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+
   const response = await fetch(url, {
     ...init,
-    headers: { Accept: "application/json", ...init.headers },
+    headers: { Accept: "application/json", ...authHeader, ...init.headers },
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      clearToken();
+    }
     throw new ApiError(response.status, await extractMessage(response));
   }
 
