@@ -53,9 +53,11 @@ Success criterion met: a user can see exactly how close they are to completing a
 
 ## Phase 4 — Set Comparison Engine
 
-Status: Not Started
+Status: In Progress (backend done)
 
-- Side-by-side compare, inventory overlap, similarity score, diff summary
+- Backend engine + endpoint — Done: `GET /api/v1/sets/compare?a=&b=&category=&page=&size=` (public) compares two catalog sets' non-spare inventories; returns a quantity-weighted similarity score (`sum(min)/sum(max)`, 2 dp), per part+color diff lines (`quantityA`/`quantityB`/`shared`/`category` ONLY_A|ONLY_B|BOTH), whole-set line counts, and paginated lines with an optional category filter. 404 if either set or its inventory is not imported.
+- Frontend compare page — Not started.
+- Later: inventory overlap visualization, metadata diff.
 
 ## Phase 5 — Build Recommendation Engine
 
