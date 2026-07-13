@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import CollectionPage from "./page";
 import type { PageResponse } from "@/lib/types/api";
 import type {
@@ -21,6 +22,11 @@ vi.mock("@/features/auth/useAuth", () => ({
   }),
 }));
 
+const { useCollectionSetsMock, useCollectionPartsMock } = vi.hoisted(() => ({
+  useCollectionSetsMock: vi.fn(),
+  useCollectionPartsMock: vi.fn(),
+}));
+
 const set: UserSetResponse = {
   id: "cs1",
   setNumber: "75257-1",
@@ -32,18 +38,26 @@ const set: UserSetResponse = {
   purchasePrice: 159.99,
   purchaseDate: "2026-01-15",
 };
-const page: PageResponse<UserSetResponse> = {
-  content: [set],
-  page: 0,
-  size: 20,
-  totalElements: 1,
-  totalPages: 1,
-  first: true,
-  last: true,
-};
+
+function setsPage(overrides: Partial<PageResponse<UserSetResponse>> = {}) {
+  return {
+    content: [set],
+    page: 0,
+    size: 20,
+    totalElements: 1,
+    totalPages: 1,
+    first: true,
+    last: true,
+    ...overrides,
+  } satisfies PageResponse<UserSetResponse>;
+}
 
 vi.mock("@/features/collection/collectionSetsHooks", () => ({
-  useCollectionSets: () => ({ data: page, isLoading: false, isError: false }),
+  useCollectionSets: (page: number, size: number) => ({
+    data: useCollectionSetsMock(page, size) ?? setsPage(),
+    isLoading: false,
+    isError: false,
+  }),
   useAddCollectionSet: () => ({ mutateAsync: vi.fn() }),
   useRemoveCollectionSet: () => ({
     mutate: vi.fn(),
@@ -63,19 +77,23 @@ const part: UserPartResponse = {
   quantity: 10,
   storageLocation: "Bin A",
 };
-const partsPage: PageResponse<UserPartResponse> = {
-  content: [part],
-  page: 0,
-  size: 20,
-  totalElements: 1,
-  totalPages: 1,
-  first: true,
-  last: true,
-};
+
+function partsPage(overrides: Partial<PageResponse<UserPartResponse>> = {}) {
+  return {
+    content: [part],
+    page: 0,
+    size: 20,
+    totalElements: 1,
+    totalPages: 1,
+    first: true,
+    last: true,
+    ...overrides,
+  } satisfies PageResponse<UserPartResponse>;
+}
 
 vi.mock("@/features/collection/collectionPartsHooks", () => ({
-  useCollectionParts: () => ({
-    data: partsPage,
+  useCollectionParts: (page: number, size: number) => ({
+    data: useCollectionPartsMock(page, size) ?? partsPage(),
     isLoading: false,
     isError: false,
   }),
@@ -89,6 +107,8 @@ vi.mock("@/features/collection/collectionPartsHooks", () => ({
 
 describe("CollectionPage", () => {
   it("renders the heading, owned sets, and loose parts sections", () => {
+    useCollectionSetsMock.mockReturnValue(setsPage());
+    useCollectionPartsMock.mockReturnValue(partsPage());
     render(<CollectionPage />);
     expect(
       screen.getByRole("heading", { name: /my collection/i }),
@@ -103,5 +123,23 @@ describe("CollectionPage", () => {
     expect(screen.getByLabelText(/part number/i)).toBeInTheDocument();
     expect(screen.getByText("Millennium Falcon")).toBeInTheDocument();
     expect(screen.getByText("Brick 2 x 4")).toBeInTheDocument();
+  });
+
+  it("advances the owned-sets page when Next is clicked", async () => {
+    const user = userEvent.setup();
+    // Sets span two pages; keep parts on a single page (no pager).
+    useCollectionSetsMock.mockReturnValue(
+      setsPage({ totalPages: 2, last: false }),
+    );
+    useCollectionPartsMock.mockReturnValue(partsPage());
+    render(<CollectionPage />);
+
+    // First render requested page 0.
+    expect(useCollectionSetsMock).toHaveBeenCalledWith(0, 20);
+
+    await user.click(screen.getByRole("button", { name: /next/i }));
+
+    // Clicking Next re-invokes the sets hook with the next page.
+    expect(useCollectionSetsMock).toHaveBeenCalledWith(1, 20);
   });
 });
