@@ -135,11 +135,17 @@ The report folds summary + pagination into one bespoke record rather than
 
 ## Security
 
-`/api/v1/sets/compare` must be publicly readable (no Bearer). Verify
-`SecurityConfig` permits catalog `GET /api/v1/sets/**` reads and that this path
-is not swept into the authenticated matcher used by `/{setNumber}/missing-parts`
-(which is explicitly authenticated). Add a permit rule for the compare path if
-the current config does not already cover it.
+`/api/v1/sets/compare` is publicly readable (no Bearer). Note this is a
+**deliberate exception**: `SecurityConfig` is `anyRequest().authenticated()`, so
+every other `/api/v1/sets/**` read (search, by-number, `/{setNumber}/parts`,
+`/{setNumber}/missing-parts`) currently requires a token. Compare is exposed
+anonymously because it returns only public Rebrickable catalog data (set part
+inventories) — no user-private information — and the frontend compare page is a
+public catalog feature. The path is therefore added explicitly to
+`SecurityConfig.PUBLIC_ENDPOINTS`.
+
+Because the endpoint is unauthenticated, the service caps `size` (max 200) so a
+hostile `size` value cannot force a large payload or an integer-overflow error.
 
 ## Testing
 
