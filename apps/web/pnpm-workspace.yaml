@@ -1,0 +1,6 @@
+# Native packages allowed to run install build scripts (pnpm blocks these by
+# default). sharp backs Next image optimization; unrs-resolver backs the
+# eslint (oxc) module resolver.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

@@ -57,7 +57,7 @@ docker compose up -d
 cd apps/api && ./mvnw spring-boot:run
 
 # 4. Frontend -> http://localhost:3000
-cd apps/web && npm install && npm run dev
+cd apps/web && pnpm install && pnpm run dev
 ```
 
 Full guide: [docs/development/setup.md](docs/development/setup.md).
@@ -69,10 +69,10 @@ Full guide: [docs/development/setup.md](docs/development/setup.md).
 ./mvnw spring-boot:run                # run API
 ./mvnw clean verify                   # build + all tests (needs PostgreSQL on 5433)
 
-# Frontend (from apps/web)
-npm run dev                           # dev server
-npm run test                          # Vitest
-npm run typecheck && npm run lint     # quality
+# Frontend (from apps/web) — package manager: pnpm
+pnpm run dev                          # dev server
+pnpm run test                         # Vitest
+pnpm run typecheck && pnpm run lint   # quality
 ```
 
 - API health: <http://localhost:8080/api/v1/health>

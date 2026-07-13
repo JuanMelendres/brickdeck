@@ -43,13 +43,16 @@ cd apps/api
 
 ```bash
 cd apps/web
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
+
+Package manager is **pnpm** (see `packageManager` in `apps/web/package.json`).
+If pnpm is not installed: `npm install -g pnpm` or `corepack enable pnpm`.
 
 - Web: <http://localhost:3000> (CORS is pre-allowed for this origin).
 - Optionally refresh generated API types (API must be running):
-  `npm run gen:api`.
+  `pnpm run gen:api`.
 
 ## 5. Run the tests
 
@@ -58,7 +61,7 @@ npm run dev
 cd apps/api && ./mvnw clean verify
 
 # frontend
-cd apps/web && npm run test && npm run typecheck && npm run lint
+cd apps/web && pnpm run test && pnpm run typecheck && pnpm run lint
 ```
 
 See [../testing/unit-testing.md](../testing/unit-testing.md) and
