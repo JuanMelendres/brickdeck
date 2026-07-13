@@ -3,6 +3,7 @@ import type { PageResponse } from "@/lib/types/api";
 import type {
   AddUserPartRequest,
   AddUserSetRequest,
+  UpdateUserPartRequest,
   UpdateUserSetRequest,
   UserPartResponse,
   UserSetResponse,
@@ -55,6 +56,14 @@ export function addCollectionPart(
   request: AddUserPartRequest,
 ): Promise<UserPartResponse> {
   return apiPost<UserPartResponse>("/api/v1/collection/parts", request);
+}
+
+/** Partially update a loose part by id (quantity/storage). */
+export function updateCollectionPart(
+  id: string,
+  request: UpdateUserPartRequest,
+): Promise<UserPartResponse> {
+  return apiPatch<UserPartResponse>(`/api/v1/collection/parts/${id}`, request);
 }
 
 /** Remove a loose part by id. */

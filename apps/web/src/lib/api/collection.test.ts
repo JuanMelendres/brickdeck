@@ -7,6 +7,7 @@ import {
   listCollectionSets,
   removeCollectionPart,
   removeCollectionSet,
+  updateCollectionPart,
   updateCollectionSet,
 } from "./collection";
 import type { PageResponse } from "@/lib/types/api";
@@ -129,6 +130,26 @@ describe("addCollectionPart", () => {
       externalPartNumber: "3001",
       colorExternalId: 4,
       quantity: 10,
+    });
+  });
+});
+
+describe("updateCollectionPart", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("PATCHes the update request by id", async () => {
+    const spy = vi
+      .spyOn(client, "apiPatch")
+      .mockResolvedValue({ id: "cp1" } as UserPartResponse);
+
+    await updateCollectionPart("cp1", {
+      quantity: 25,
+      storageLocation: "Bin B",
+    });
+
+    expect(spy).toHaveBeenCalledWith("/api/v1/collection/parts/cp1", {
+      quantity: 25,
+      storageLocation: "Bin B",
     });
   });
 });

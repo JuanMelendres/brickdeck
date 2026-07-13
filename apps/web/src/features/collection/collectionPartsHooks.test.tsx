@@ -7,6 +7,7 @@ import {
   useAddCollectionPart,
   useCollectionParts,
   useRemoveCollectionPart,
+  useUpdateCollectionPart,
 } from "./collectionPartsHooks";
 import type { PageResponse } from "@/lib/types/api";
 import type { UserPartResponse } from "@/lib/types/collection";
@@ -69,6 +70,30 @@ describe("useAddCollectionPart", () => {
     });
 
     expect(api.addCollectionPart).toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: ["collection", "parts"],
+    });
+  });
+});
+
+describe("useUpdateCollectionPart", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("updates a part and invalidates the parts list", async () => {
+    vi.spyOn(api, "updateCollectionPart").mockResolvedValue({
+      id: "cp1",
+    } as UserPartResponse);
+    const { client, Wrapper } = wrapper();
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useUpdateCollectionPart(), {
+      wrapper: Wrapper,
+    });
+    await result.current.mutateAsync({ id: "cp1", request: { quantity: 25 } });
+
+    expect(api.updateCollectionPart).toHaveBeenCalledWith("cp1", {
+      quantity: 25,
+    });
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: ["collection", "parts"],
     });

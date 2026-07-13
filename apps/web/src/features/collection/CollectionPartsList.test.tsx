@@ -38,4 +38,16 @@ describe("CollectionPartsList", () => {
 
     expect(onRemove).toHaveBeenCalledWith("cp1");
   });
+
+  it("calls onEdit with the part when Edit is clicked", async () => {
+    const onEdit = vi.fn();
+    render(
+      <CollectionPartsList parts={[part]} onRemove={vi.fn()} onEdit={onEdit} />,
+    );
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: /edit/i }));
+
+    expect(onEdit).toHaveBeenCalledWith(part);
+  });
 });

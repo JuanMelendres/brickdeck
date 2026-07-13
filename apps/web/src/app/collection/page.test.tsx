@@ -99,6 +99,7 @@ vi.mock("@/features/collection/collectionPartsHooks", () => ({
     isError: false,
   }),
   useAddCollectionPart: () => ({ mutateAsync: vi.fn() }),
+  useUpdateCollectionPart: () => ({ mutateAsync: vi.fn() }),
   useRemoveCollectionPart: () => ({
     mutate: vi.fn(),
     isPending: false,

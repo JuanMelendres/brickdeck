@@ -15,6 +15,7 @@ import { CollectionSetsList } from "@/features/collection/CollectionSetsList";
 import { EditSetDialog } from "@/features/collection/EditSetDialog";
 import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollectionForm";
 import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
+import { EditPartDialog } from "@/features/collection/EditPartDialog";
 import { PaginationControls } from "@/features/collection/PaginationControls";
 import {
   useAddCollectionSet,
@@ -26,11 +27,14 @@ import {
   useAddCollectionPart,
   useCollectionParts,
   useRemoveCollectionPart,
+  useUpdateCollectionPart,
 } from "@/features/collection/collectionPartsHooks";
 import type {
   AddUserPartRequest,
   AddUserSetRequest,
+  UpdateUserPartRequest,
   UpdateUserSetRequest,
+  UserPartResponse,
   UserSetResponse,
 } from "@/lib/types/collection";
 
@@ -100,15 +104,21 @@ function OwnedSetsSection() {
 
 function LoosePartsSection() {
   const [page, setPage] = useState(0);
+  const [editingPart, setEditingPart] = useState<UserPartResponse | null>(null);
   const { data, isLoading, isError, error } = useCollectionParts(
     page,
     PAGE_SIZE,
   );
   const addPart = useAddCollectionPart();
+  const updatePart = useUpdateCollectionPart();
   const removePart = useRemoveCollectionPart();
 
   const handleAdd = async (values: AddUserPartRequest) => {
     await addPart.mutateAsync(values);
+  };
+
+  const handleUpdate = async (id: string, values: UpdateUserPartRequest) => {
+    await updatePart.mutateAsync({ id, request: values });
   };
 
   return (
@@ -134,6 +144,7 @@ function LoosePartsSection() {
           <CollectionPartsList
             parts={data.content}
             onRemove={(id) => removePart.mutate(id)}
+            onEdit={setEditingPart}
             removingId={removePart.isPending ? removePart.variables : null}
           />
           <PaginationControls
@@ -144,6 +155,13 @@ function LoosePartsSection() {
             onPageChange={setPage}
           />
         </>
+      )}
+      {editingPart && (
+        <EditPartDialog
+          part={editingPart}
+          onSubmit={handleUpdate}
+          onClose={() => setEditingPart(null)}
+        />
       )}
     </Stack>
   );
