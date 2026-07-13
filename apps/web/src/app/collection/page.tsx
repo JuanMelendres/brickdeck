@@ -12,34 +12,48 @@ import {
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { AddSetToCollectionForm } from "@/features/collection/AddSetToCollectionForm";
 import { CollectionSetsList } from "@/features/collection/CollectionSetsList";
+import { EditSetDialog } from "@/features/collection/EditSetDialog";
 import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollectionForm";
 import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
+import { EditPartDialog } from "@/features/collection/EditPartDialog";
 import { PaginationControls } from "@/features/collection/PaginationControls";
 import {
   useAddCollectionSet,
   useCollectionSets,
   useRemoveCollectionSet,
+  useUpdateCollectionSet,
 } from "@/features/collection/collectionSetsHooks";
 import {
   useAddCollectionPart,
   useCollectionParts,
   useRemoveCollectionPart,
+  useUpdateCollectionPart,
 } from "@/features/collection/collectionPartsHooks";
 import type {
   AddUserPartRequest,
   AddUserSetRequest,
+  UpdateUserPartRequest,
+  UpdateUserSetRequest,
+  UserPartResponse,
+  UserSetResponse,
 } from "@/lib/types/collection";
 
 const PAGE_SIZE = 20;
 
 function OwnedSetsSection() {
   const [page, setPage] = useState(0);
+  const [editingSet, setEditingSet] = useState<UserSetResponse | null>(null);
   const { data, isLoading, isError, error } = useCollectionSets(page, PAGE_SIZE);
   const addSet = useAddCollectionSet();
+  const updateSet = useUpdateCollectionSet();
   const removeSet = useRemoveCollectionSet();
 
   const handleAdd = async (values: AddUserSetRequest) => {
     await addSet.mutateAsync(values);
+  };
+
+  const handleUpdate = async (id: string, values: UpdateUserSetRequest) => {
+    await updateSet.mutateAsync({ id, request: values });
   };
 
   return (
@@ -65,6 +79,7 @@ function OwnedSetsSection() {
           <CollectionSetsList
             sets={data.content}
             onRemove={(id) => removeSet.mutate(id)}
+            onEdit={setEditingSet}
             removingId={removeSet.isPending ? removeSet.variables : null}
           />
           <PaginationControls
@@ -76,21 +91,34 @@ function OwnedSetsSection() {
           />
         </>
       )}
+      {editingSet && (
+        <EditSetDialog
+          set={editingSet}
+          onSubmit={handleUpdate}
+          onClose={() => setEditingSet(null)}
+        />
+      )}
     </Stack>
   );
 }
 
 function LoosePartsSection() {
   const [page, setPage] = useState(0);
+  const [editingPart, setEditingPart] = useState<UserPartResponse | null>(null);
   const { data, isLoading, isError, error } = useCollectionParts(
     page,
     PAGE_SIZE,
   );
   const addPart = useAddCollectionPart();
+  const updatePart = useUpdateCollectionPart();
   const removePart = useRemoveCollectionPart();
 
   const handleAdd = async (values: AddUserPartRequest) => {
     await addPart.mutateAsync(values);
+  };
+
+  const handleUpdate = async (id: string, values: UpdateUserPartRequest) => {
+    await updatePart.mutateAsync({ id, request: values });
   };
 
   return (
@@ -116,6 +144,7 @@ function LoosePartsSection() {
           <CollectionPartsList
             parts={data.content}
             onRemove={(id) => removePart.mutate(id)}
+            onEdit={setEditingPart}
             removingId={removePart.isPending ? removePart.variables : null}
           />
           <PaginationControls
@@ -126,6 +155,13 @@ function LoosePartsSection() {
             onPageChange={setPage}
           />
         </>
+      )}
+      {editingPart && (
+        <EditPartDialog
+          part={editingPart}
+          onSubmit={handleUpdate}
+          onClose={() => setEditingPart(null)}
+        />
       )}
     </Stack>
   );

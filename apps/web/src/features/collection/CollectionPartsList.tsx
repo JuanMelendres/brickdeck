@@ -16,12 +16,14 @@ import type { UserPartResponse } from "@/lib/types/collection";
 interface CollectionPartsListProps {
   parts: UserPartResponse[];
   onRemove: (id: string) => void;
+  onEdit?: (part: UserPartResponse) => void;
   removingId?: string | null;
 }
 
 export function CollectionPartsList({
   parts,
   onRemove,
+  onEdit,
   removingId,
 }: CollectionPartsListProps) {
   if (parts.length === 0) {
@@ -52,6 +54,11 @@ export function CollectionPartsList({
               <TableCell align="right">{part.quantity ?? "—"}</TableCell>
               <TableCell>{part.storageLocation ?? "—"}</TableCell>
               <TableCell align="right">
+                {onEdit && (
+                  <Button size="small" onClick={() => onEdit(part)}>
+                    Edit
+                  </Button>
+                )}
                 <Button
                   color="error"
                   size="small"

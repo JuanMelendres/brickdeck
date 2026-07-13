@@ -16,6 +16,7 @@ import type { UserSetResponse } from "@/lib/types/collection";
 interface CollectionSetsListProps {
   sets: UserSetResponse[];
   onRemove: (id: string) => void;
+  onEdit?: (set: UserSetResponse) => void;
   removingId?: string | null;
 }
 
@@ -26,6 +27,7 @@ function formatPrice(price: number | null): string {
 export function CollectionSetsList({
   sets,
   onRemove,
+  onEdit,
   removingId,
 }: CollectionSetsListProps) {
   if (sets.length === 0) {
@@ -58,6 +60,11 @@ export function CollectionSetsList({
               <TableCell align="right">{formatPrice(set.purchasePrice)}</TableCell>
               <TableCell>{set.purchaseDate ?? "—"}</TableCell>
               <TableCell align="right">
+                {onEdit && (
+                  <Button size="small" onClick={() => onEdit(set)}>
+                    Edit
+                  </Button>
+                )}
                 <Button
                   color="error"
                   size="small"
