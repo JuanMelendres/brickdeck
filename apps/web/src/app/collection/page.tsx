@@ -14,6 +14,7 @@ import { AddSetToCollectionForm } from "@/features/collection/AddSetToCollection
 import { CollectionSetsList } from "@/features/collection/CollectionSetsList";
 import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollectionForm";
 import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
+import { PaginationControls } from "@/features/collection/PaginationControls";
 import {
   useAddCollectionSet,
   useCollectionSets,
@@ -32,7 +33,7 @@ import type {
 const PAGE_SIZE = 20;
 
 function OwnedSetsSection() {
-  const [page] = useState(0);
+  const [page, setPage] = useState(0);
   const { data, isLoading, isError, error } = useCollectionSets(page, PAGE_SIZE);
   const addSet = useAddCollectionSet();
   const removeSet = useRemoveCollectionSet();
@@ -60,18 +61,27 @@ function OwnedSetsSection() {
         </Alert>
       )}
       {data && (
-        <CollectionSetsList
-          sets={data.content}
-          onRemove={(id) => removeSet.mutate(id)}
-          removingId={removeSet.isPending ? removeSet.variables : null}
-        />
+        <>
+          <CollectionSetsList
+            sets={data.content}
+            onRemove={(id) => removeSet.mutate(id)}
+            removingId={removeSet.isPending ? removeSet.variables : null}
+          />
+          <PaginationControls
+            page={data.page}
+            totalPages={data.totalPages}
+            first={data.first}
+            last={data.last}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </Stack>
   );
 }
 
 function LoosePartsSection() {
-  const [page] = useState(0);
+  const [page, setPage] = useState(0);
   const { data, isLoading, isError, error } = useCollectionParts(
     page,
     PAGE_SIZE,
@@ -102,11 +112,20 @@ function LoosePartsSection() {
         </Alert>
       )}
       {data && (
-        <CollectionPartsList
-          parts={data.content}
-          onRemove={(id) => removePart.mutate(id)}
-          removingId={removePart.isPending ? removePart.variables : null}
-        />
+        <>
+          <CollectionPartsList
+            parts={data.content}
+            onRemove={(id) => removePart.mutate(id)}
+            removingId={removePart.isPending ? removePart.variables : null}
+          />
+          <PaginationControls
+            page={data.page}
+            totalPages={data.totalPages}
+            first={data.first}
+            last={data.last}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </Stack>
   );

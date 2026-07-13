@@ -2,7 +2,7 @@
 
 ## Last Updated
 
-2026-07-09
+2026-07-13
 
 ## Current Phase
 
@@ -38,6 +38,8 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 
 ## Recently Worked On
 
+- Frontend collection pagination (TDD): the collection sets/parts hooks + API + query keys already accepted `page`/`size`; the gap was UI — both sections passed a fixed page 0 with no controls. Added shared presentational `features/collection/PaginationControls.tsx` (prev/next + "Page X of N", disabled on first/last, renders null when `totalPages <= 1`; mirrors the missing-pieces panel idiom). `/collection` `OwnedSetsSection`/`LoosePartsSection` now hold settable `page` state wired to `data.page/totalPages/first/last`. 115 web tests (+6). Branch `feat/frontend-collection-pagination`.
+- Tooling: migrated `apps/web` from npm to pnpm (project standard is pnpm). `pnpm import` preserved versions into `pnpm-lock.yaml`; removed `package-lock.json`; pinned `packageManager: pnpm@11.12.0`; `pnpm-workspace.yaml` uses `allowBuilds:` map (pnpm 11 key — NOT `onlyBuiltDependencies` in package.json, which is ignored) to permit `sharp`/`unrs-resolver` native build scripts. CI frontend job uses `pnpm/action-setup@v4` + pnpm cache + `pnpm install --frozen-lockfile`. Docs switched npm→pnpm. Branch `chore/migrate-pnpm`. Verify: `pnpm install/test/typecheck/lint/build` all green.
 - Phase 3b missing-pieces richer report (TDD): backend — `MissingPartsReport` gained `missingLineCount` + pagination fields (`page`/`size`/`totalLines`/`totalPages`/`first`/`last`); `computeMissingParts(setNumber, userId, missingOnly, page, size)` filters (missing-only), sorts (missing desc, part, color), and paginates the lines while keeping whole-set totals; controller adds `missingOnly`/`page`/`size` query params. Frontend — `getMissingParts` + `useMissingParts` take `{missingOnly, page}` (in query key); `MissingPartsPanel` gained an "Only missing" `Switch` (role `switch`; needs explicit aria-label) + prev/next pagination; set-detail page holds `missingOnly`/`missingPage` state (reset page on toggle). Configurable spare policy dropped (fixed rule). 115 backend tests (+3), 109 web tests (+3). Branch `feat/missing-parts-filter`.
 - Phase 3c missing-pieces frontend (TDD): `lib/types/missingParts.ts` + `lib/api/missingParts.ts` (`getMissingParts`, hand-written types — schema.d.ts predates the endpoint), query key `sets.missingParts`, `useMissingParts(setNumber, enabled)` (enabled only when authenticated — endpoint needs Bearer), presentational `MissingPartsPanel` (auth-gated login prompt when signed out; 404 → "import inventory" hint; completion `LinearProgress` bar + per-part required/owned/missing table, missing rows highlighted). Wired into `/sets/[setNumber]` set-detail page below the inventory. MUI v9: `Stack` `justifyContent`/`alignItems` go through `sx`, not direct props. 106 web tests (+5). Branch `feat/frontend-missing-parts`.
 - Phase 3a missing-pieces engine (backend, TDD): new `missingpieces` package — `GET /api/v1/sets/{setNumber}/missing-parts` (authenticated) → `MissingPartsReport` (setNumber, totalRequired, totalOwned [capped per line], totalMissing, completionPercentage, `MissingPartLine[]`). `MissingPartsService.computeMissingParts` compares the target's non-spare `set_parts` against owned = loose `user_parts` + `set_parts` of the user's OWNED/BUILT/IN_PROGRESS sets (WISHLIST excluded; spares count as owned, not required). `OwnedInventoryRepository` (two grouped-sum JPQL queries → `PartColorQuantity` projection); added `SetPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse` (+EntityGraph part,color); made `catalog.service.SetNumbers` public. 404 if set or inventory not imported. Tests: service (Mockito, 4), controller (`@WebMvcTest`+`authentication()`, 2), integration (`@SpringBootTest` real Postgres validating the JPQL, 1). 112 backend tests (+7). Branch `feat/missing-parts-engine`.
@@ -78,7 +80,7 @@ Phase 1 (Catalog Foundation) complete. Phase 0 complete. Phase 2 (User Collectio
 ## Immediate Next Steps
 
 1. Phase 3 — Missing Pieces Engine (backend): compare a target set's required parts vs the user's owned inventory (sets' parts + loose parts); expose missing pieces + completion percentage. First backend slice, then a frontend view.
-2. Frontend polish deferred from Phase 2: collection set PATCH (edit status/price/date) and loose-part PATCH (edit quantity/storage) UIs; pagination controls on both collection lists (currently page 0 only).
+2. Frontend polish deferred from Phase 2: collection set PATCH (edit status/price/date) and loose-part PATCH (edit quantity/storage) UIs. (Collection list pagination — DONE.)
 2. Add Postman collection under `docs/api/postman` (now covers auth + collection sets/parts); mark backend DTO nullability to drop the frontend `Nullable<T>` workaround.
 3. Add CI (GitHub Actions) — highest-value gap flagged in `docs/testing`; run `mvnw verify` + web test/typecheck/lint.
 4. Optional later: single-part find-or-import (`RebrickableClient.getPart/getColor`) so loose pieces can be added without pre-importing a set.
