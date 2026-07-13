@@ -61,12 +61,13 @@ public class SetComparisonService {
         String a = SetNumbers.normalize(setNumberA);
         String b = SetNumbers.normalize(setNumberB);
 
-        Map<PartColorKey, Integer> qtyA = sumByKey(requireInventory(a));
+        List<SetPart> partsA = requireInventory(a);
+        Map<PartColorKey, Integer> qtyA = sumByKey(partsA);
         List<SetPart> partsB = requireInventory(b);
         Map<PartColorKey, Integer> qtyB = sumByKey(partsB);
 
         Map<PartColorKey, SetPart> repr = new HashMap<>();
-        for (SetPart sp : requireInventory(a)) {
+        for (SetPart sp : partsA) {
             repr.putIfAbsent(key(sp), sp);
         }
         for (SetPart sp : partsB) {
@@ -127,7 +128,7 @@ public class SetComparisonService {
         long totalLines = filtered.size();
         int totalPages = (int) Math.ceil((double) totalLines / safeSize);
 
-        int from = Math.min(safePage * safeSize, filtered.size());
+        int from = (int) Math.min((long) safePage * safeSize, filtered.size());
         int to = Math.min(from + safeSize, filtered.size());
         List<SetComparisonLine> pageLines = List.copyOf(filtered.subList(from, to));
 

@@ -146,6 +146,33 @@ class SetComparisonServiceTest {
                 .hasMessageContaining("inventory");
     }
 
+    @Test
+    void paginatesLinesWhileKeepingWholeSetSummary() {
+        // 3 distinct BOTH lines so ordering within a category is by part number.
+        stubSet("A-1", List.of(
+                line("A-1", brickX, red, 1),
+                line("A-1", plateY, red, 1),
+                line("A-1", tileZ, red, 1)));
+        stubSet("B-1", List.of(
+                line("B-1", brickX, red, 1),
+                line("B-1", plateY, red, 1),
+                line("B-1", tileZ, red, 1)));
+
+        SetComparisonReport page0 = service.compare("A-1", "B-1", null, 0, 2);
+        assertThat(page0.totalLines()).isEqualTo(3);
+        assertThat(page0.totalPages()).isEqualTo(2);
+        assertThat(page0.lines()).hasSize(2);
+        assertThat(page0.page()).isEqualTo(0);
+        assertThat(page0.size()).isEqualTo(2);
+        assertThat(page0.first()).isTrue();
+        assertThat(page0.last()).isFalse();
+
+        SetComparisonReport page1 = service.compare("A-1", "B-1", null, 1, 2);
+        assertThat(page1.lines()).hasSize(1);
+        assertThat(page1.first()).isFalse();
+        assertThat(page1.last()).isTrue();
+    }
+
     private void stubSet(String number, List<SetPart> parts) {
         when(brickSetRepository.findByExternalSetNumber(number))
                 .thenReturn(java.util.Optional.of(new BrickSet()));
