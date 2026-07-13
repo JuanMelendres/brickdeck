@@ -94,7 +94,11 @@ Goal: calculate what a user is missing to complete a set.
 
 ## Phase 4 — Set Comparison Engine
 
+Status: In Progress (backend done).
+
 Goal: compare similar sets across years or versions.
+
+Backend shipped: `GET /api/v1/sets/compare?a=&b=&category=&page=&size=` (public) compares two catalog sets' non-spare inventories and returns a quantity-weighted similarity score (`sum(min)/sum(max)`), categorized per part+color diff lines (ONLY_A/ONLY_B/BOTH) with counts, and paginated lines with an optional category filter. 404 if a set or its inventory is not imported. Frontend compare page still pending.
 
 ### Features
 
