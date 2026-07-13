@@ -12,6 +12,7 @@ import {
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { AddSetToCollectionForm } from "@/features/collection/AddSetToCollectionForm";
 import { CollectionSetsList } from "@/features/collection/CollectionSetsList";
+import { EditSetDialog } from "@/features/collection/EditSetDialog";
 import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollectionForm";
 import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
 import { PaginationControls } from "@/features/collection/PaginationControls";
@@ -19,6 +20,7 @@ import {
   useAddCollectionSet,
   useCollectionSets,
   useRemoveCollectionSet,
+  useUpdateCollectionSet,
 } from "@/features/collection/collectionSetsHooks";
 import {
   useAddCollectionPart,
@@ -28,18 +30,26 @@ import {
 import type {
   AddUserPartRequest,
   AddUserSetRequest,
+  UpdateUserSetRequest,
+  UserSetResponse,
 } from "@/lib/types/collection";
 
 const PAGE_SIZE = 20;
 
 function OwnedSetsSection() {
   const [page, setPage] = useState(0);
+  const [editingSet, setEditingSet] = useState<UserSetResponse | null>(null);
   const { data, isLoading, isError, error } = useCollectionSets(page, PAGE_SIZE);
   const addSet = useAddCollectionSet();
+  const updateSet = useUpdateCollectionSet();
   const removeSet = useRemoveCollectionSet();
 
   const handleAdd = async (values: AddUserSetRequest) => {
     await addSet.mutateAsync(values);
+  };
+
+  const handleUpdate = async (id: string, values: UpdateUserSetRequest) => {
+    await updateSet.mutateAsync({ id, request: values });
   };
 
   return (
@@ -65,6 +75,7 @@ function OwnedSetsSection() {
           <CollectionSetsList
             sets={data.content}
             onRemove={(id) => removeSet.mutate(id)}
+            onEdit={setEditingSet}
             removingId={removeSet.isPending ? removeSet.variables : null}
           />
           <PaginationControls
@@ -75,6 +86,13 @@ function OwnedSetsSection() {
             onPageChange={setPage}
           />
         </>
+      )}
+      {editingSet && (
+        <EditSetDialog
+          set={editingSet}
+          onSubmit={handleUpdate}
+          onClose={() => setEditingSet(null)}
+        />
       )}
     </Stack>
   );

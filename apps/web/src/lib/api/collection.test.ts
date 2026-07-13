@@ -7,6 +7,7 @@ import {
   listCollectionSets,
   removeCollectionPart,
   removeCollectionSet,
+  updateCollectionSet,
 } from "./collection";
 import type { PageResponse } from "@/lib/types/api";
 import type {
@@ -52,6 +53,23 @@ describe("addCollectionSet", () => {
     expect(spy).toHaveBeenCalledWith("/api/v1/collection/sets", {
       setNumber: "75257-1",
       status: "OWNED",
+    });
+  });
+});
+
+describe("updateCollectionSet", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("PATCHes the update request by id", async () => {
+    const spy = vi
+      .spyOn(client, "apiPatch")
+      .mockResolvedValue({ id: "cs1" } as UserSetResponse);
+
+    await updateCollectionSet("cs1", { status: "BUILT", purchasePrice: 99.9 });
+
+    expect(spy).toHaveBeenCalledWith("/api/v1/collection/sets/cs1", {
+      status: "BUILT",
+      purchasePrice: 99.9,
     });
   });
 });

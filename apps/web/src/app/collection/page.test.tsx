@@ -59,6 +59,7 @@ vi.mock("@/features/collection/collectionSetsHooks", () => ({
     isError: false,
   }),
   useAddCollectionSet: () => ({ mutateAsync: vi.fn() }),
+  useUpdateCollectionSet: () => ({ mutateAsync: vi.fn() }),
   useRemoveCollectionSet: () => ({
     mutate: vi.fn(),
     isPending: false,

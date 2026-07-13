@@ -1,8 +1,9 @@
-import { apiDelete, apiGet, apiPost } from "./client";
+import { apiDelete, apiGet, apiPatch, apiPost } from "./client";
 import type { PageResponse } from "@/lib/types/api";
 import type {
   AddUserPartRequest,
   AddUserSetRequest,
+  UpdateUserSetRequest,
   UserPartResponse,
   UserSetResponse,
 } from "@/lib/types/collection";
@@ -23,6 +24,14 @@ export function addCollectionSet(
   request: AddUserSetRequest,
 ): Promise<UserSetResponse> {
   return apiPost<UserSetResponse>("/api/v1/collection/sets", request);
+}
+
+/** Partially update a collection set by id (status/price/date). */
+export function updateCollectionSet(
+  id: string,
+  request: UpdateUserSetRequest,
+): Promise<UserSetResponse> {
+  return apiPatch<UserSetResponse>(`/api/v1/collection/sets/${id}`, request);
 }
 
 /** Remove a collection set by id. */

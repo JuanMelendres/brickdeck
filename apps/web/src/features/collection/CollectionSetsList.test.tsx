@@ -37,4 +37,16 @@ describe("CollectionSetsList", () => {
 
     expect(onRemove).toHaveBeenCalledWith("cs1");
   });
+
+  it("calls onEdit with the set when Edit is clicked", async () => {
+    const onEdit = vi.fn();
+    render(
+      <CollectionSetsList sets={[set]} onRemove={vi.fn()} onEdit={onEdit} />,
+    );
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("button", { name: /edit/i }));
+
+    expect(onEdit).toHaveBeenCalledWith(set);
+  });
 });

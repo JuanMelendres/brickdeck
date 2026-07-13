@@ -37,7 +37,9 @@ Status: In Progress
 - Frontend login/register wiring — Done: auth client, login/register pages, protected routes, nav/logout, collection UI (owned sets + loose parts)
 - Frontend collection pagination — Done: shared `PaginationControls` (prev/next, hidden on single page) on both collection lists; `page` state per section drives the paginated hooks
 
-Remaining deferred polish: collection set/part PATCH edit UIs (status/price/date, quantity/storage).
+Frontend collection set edit (PATCH) — Done: per-row Edit button opens an `EditSetDialog` (RHF+Zod) that PATCHes status/price/date; empty fields omitted (backend cannot clear to null).
+
+Remaining deferred polish: collection loose-part PATCH edit UI (quantity/storage).
 
 Decomposed into 2a (auth) → 2b (add-set) → 2c (loose pieces). Auth = JWT stateless (see `docs/superpowers/specs/2026-07-06-auth-foundation-design.md`).
 
