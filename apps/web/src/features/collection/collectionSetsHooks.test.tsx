@@ -7,6 +7,7 @@ import {
   useAddCollectionSet,
   useCollectionSets,
   useRemoveCollectionSet,
+  useUpdateCollectionSet,
 } from "./collectionSetsHooks";
 import type { PageResponse } from "@/lib/types/api";
 import type { UserSetResponse } from "@/lib/types/collection";
@@ -65,6 +66,33 @@ describe("useAddCollectionSet", () => {
     await result.current.mutateAsync({ setNumber: "75257-1", status: "OWNED" });
 
     expect(api.addCollectionSet).toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: ["collection", "sets"],
+    });
+  });
+});
+
+describe("useUpdateCollectionSet", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("updates a set and invalidates the collection list", async () => {
+    vi.spyOn(api, "updateCollectionSet").mockResolvedValue({
+      id: "cs1",
+    } as UserSetResponse);
+    const { client, Wrapper } = wrapper();
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+
+    const { result } = renderHook(() => useUpdateCollectionSet(), {
+      wrapper: Wrapper,
+    });
+    await result.current.mutateAsync({
+      id: "cs1",
+      request: { status: "BUILT" },
+    });
+
+    expect(api.updateCollectionSet).toHaveBeenCalledWith("cs1", {
+      status: "BUILT",
+    });
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: ["collection", "sets"],
     });

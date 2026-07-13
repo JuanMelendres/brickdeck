@@ -59,6 +59,7 @@ vi.mock("@/features/collection/collectionSetsHooks", () => ({
     isError: false,
   }),
   useAddCollectionSet: () => ({ mutateAsync: vi.fn() }),
+  useUpdateCollectionSet: () => ({ mutateAsync: vi.fn() }),
   useRemoveCollectionSet: () => ({
     mutate: vi.fn(),
     isPending: false,
@@ -98,6 +99,7 @@ vi.mock("@/features/collection/collectionPartsHooks", () => ({
     isError: false,
   }),
   useAddCollectionPart: () => ({ mutateAsync: vi.fn() }),
+  useUpdateCollectionPart: () => ({ mutateAsync: vi.fn() }),
   useRemoveCollectionPart: () => ({
     mutate: vi.fn(),
     isPending: false,
