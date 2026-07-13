@@ -25,6 +25,9 @@ import java.util.UUID;
 @Service
 public class SetComparisonService {
 
+    /** Upper bound on page size; the endpoint is public, so cap the payload. */
+    private static final int MAX_PAGE_SIZE = 200;
+
     private final BrickSetRepository brickSetRepository;
     private final SetPartRepository setPartRepository;
 
@@ -123,7 +126,7 @@ public class SetComparisonService {
                 .sorted(LINE_ORDER)
                 .toList();
 
-        int safeSize = size <= 0 ? 50 : size;
+        int safeSize = size <= 0 ? 50 : Math.min(size, MAX_PAGE_SIZE);
         int safePage = Math.max(0, page);
         long totalLines = filtered.size();
         int totalPages = (int) Math.ceil((double) totalLines / safeSize);

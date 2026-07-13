@@ -173,6 +173,25 @@ class SetComparisonServiceTest {
         assertThat(page1.last()).isTrue();
     }
 
+    @Test
+    void sumsRepeatedPartColorRowsWithinASet() {
+        // Set A lists brickX/red across two non-spare rows: 2 + 3 = 5.
+        stubSet("A-1", List.of(
+                line("A-1", brickX, red, 2),
+                line("A-1", brickX, red, 3)));
+        stubSet("B-1", List.of(line("B-1", brickX, red, 5)));
+
+        SetComparisonReport report = service.compare("A-1", "B-1", null, 0, 50);
+
+        assertThat(report.totalLines()).isEqualTo(1);
+        assertThat(report.sharedLineCount()).isEqualTo(1);
+        assertThat(report.similarityScore()).isEqualTo(1.0);
+        var line = report.lines().get(0);
+        assertThat(line.quantityA()).isEqualTo(5);
+        assertThat(line.quantityB()).isEqualTo(5);
+        assertThat(line.shared()).isEqualTo(5);
+    }
+
     private void stubSet(String number, List<SetPart> parts) {
         when(brickSetRepository.findByExternalSetNumber(number))
                 .thenReturn(java.util.Optional.of(new BrickSet()));
