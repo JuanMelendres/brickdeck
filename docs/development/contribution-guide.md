@@ -39,7 +39,7 @@ Before opening a PR:
 2. Tests added/updated (TDD), and green:
    ```bash
    cd apps/api && ./mvnw clean verify
-   cd apps/web && npm run test && npm run typecheck && npm run lint && npm run build
+   cd apps/web && pnpm run test && pnpm run typecheck && pnpm run lint && pnpm run build
    ```
 3. Docs updated when behavior/architecture/decisions change (see below).
 4. No secrets committed; `.env.example` updated if new variables were introduced.
