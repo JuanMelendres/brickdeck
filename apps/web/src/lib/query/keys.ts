@@ -1,3 +1,5 @@
+import type { ComparisonCategory } from "@/lib/types/comparison";
+
 /** Centralized TanStack Query keys. Invalidate by prefix. */
 export const queryKeys = {
   sets: {
@@ -10,6 +12,12 @@ export const queryKeys = {
       ["sets", "parts", setNumber, page, size] as const,
     missingParts: (setNumber: string, missingOnly: boolean, page: number) =>
       ["sets", "missing-parts", setNumber, missingOnly, page] as const,
+    comparison: (
+      a: string,
+      b: string,
+      category: ComparisonCategory | null,
+      page: number,
+    ) => ["sets", "compare", a, b, category, page] as const,
   },
   collection: {
     all: ["collection"] as const,

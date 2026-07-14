@@ -53,11 +53,13 @@ Success criterion met: a user can see exactly how close they are to completing a
 
 ## Phase 4 — Set Comparison Engine
 
-Status: In Progress (backend done)
+Status: Done (core)
 
 - Backend engine + endpoint — Done: `GET /api/v1/sets/compare?a=&b=&category=&page=&size=` (public) compares two catalog sets' non-spare inventories; returns a quantity-weighted similarity score (`sum(min)/sum(max)`, 2 dp), per part+color diff lines (`quantityA`/`quantityB`/`shared`/`category` ONLY_A|ONLY_B|BOTH), whole-set line counts, and paginated lines with an optional category filter. 404 if either set or its inventory is not imported.
-- Frontend compare page — Not started.
-- Later: inventory overlap visualization, metadata diff.
+- Frontend compare page — Done: `/compare?a=&b=` (URL-driven, shareable) — side-by-side A-vs-B header, quantity-weighted similarity meter, category filter (All/Both/Only A/Only B), diff table (part/color/qty A/qty B/shared/category chip), pagination (reuses `PaginationControls`), loading/404/error/empty states. Slices: types+api → `useSetComparison` hook → `SetComparisonView` + route (TDD). PR #33 → develop.
+- Later: inventory overlap visualization, metadata diff; `Compare` nav link for discoverability.
+
+Success criterion met: a user can visually compare two sets' parts and see how similar they are.
 
 ## Phase 5 — Build Recommendation Engine
 
