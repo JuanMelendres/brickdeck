@@ -171,6 +171,30 @@ paths:
               schema: { $ref: "#/components/schemas/MissingPartsReport" }
         "401": { description: Unauthorized }
         "404": { description: Set or inventory not imported }
+  /api/v1/sets/compare:
+    get:
+      tags: [Catalog]
+      summary: Compare two sets' inventories (public)
+      description: >-
+        Compares two catalog sets' non-spare inventories. Returns a
+        quantity-weighted similarity score (sum(min)/sum(max), 2 decimals),
+        per part+color diff lines, whole-set line counts, and the paginated
+        lines after an optional category filter.
+      parameters:
+        - { name: a, in: query, required: true, schema: { type: string } }
+        - { name: b, in: query, required: true, schema: { type: string } }
+        - name: category
+          in: query
+          schema: { $ref: "#/components/schemas/ComparisonCategory" }
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SetComparisonReport" }
+        "404": { description: A set or its inventory is not imported }
 
   /api/v1/collection/sets:
     post:
@@ -401,6 +425,40 @@ components:
         lines:
           type: array
           items: { $ref: "#/components/schemas/MissingPartLine" }
+        page: { type: integer }
+        size: { type: integer }
+        totalLines: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+    ComparisonCategory:
+      type: string
+      enum: [ONLY_A, ONLY_B, BOTH]
+    SetComparisonLine:
+      type: object
+      properties:
+        partNumber: { type: string }
+        partName: { type: string }
+        partImageUrl: { type: string }
+        colorExternalId: { type: integer }
+        colorName: { type: string }
+        colorRgb: { type: string }
+        quantityA: { type: integer }
+        quantityB: { type: integer }
+        shared: { type: integer }
+        category: { $ref: "#/components/schemas/ComparisonCategory" }
+    SetComparisonReport:
+      type: object
+      properties:
+        setNumberA: { type: string }
+        setNumberB: { type: string }
+        similarityScore: { type: number, format: double }
+        sharedLineCount: { type: integer }
+        onlyALineCount: { type: integer }
+        onlyBLineCount: { type: integer }
+        lines:
+          type: array
+          items: { $ref: "#/components/schemas/SetComparisonLine" }
         page: { type: integer }
         size: { type: integer }
         totalLines: { type: integer, format: int64 }

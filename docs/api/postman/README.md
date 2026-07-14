@@ -1,25 +1,32 @@
 # Postman Collection
 
-**TODO:** No Postman collection has been exported yet. When one is created, place
-it here as `brickdeck.postman_collection.json` and link it from
-[`../README.md`](../README.md).
+- [`brickdeck.postman_collection.json`](./brickdeck.postman_collection.json) — the API collection.
+- [`brickdeck.local.postman_environment.json`](./brickdeck.local.postman_environment.json) — local environment (`baseUrl = http://localhost:8080`).
 
-## How to generate
+## Usage
 
-Two options:
+1. Import both files into Postman.
+2. Select the **BrickDeck Local** environment.
+3. Run **Auth > Login** first — its test script stores the JWT in `{{token}}`.
+   The collection sends `{{token}}` as a Bearer token by default; the public
+   Catalog requests override this with no-auth.
+4. Add-to-collection requests store the created `id` into `{{userSetId}}` /
+   `{{userPartId}}` for the follow-up update/delete requests.
 
-1. **Import the OpenAPI spec into Postman.** Import
-   [`../openapi.yaml`](../openapi.yaml) (or the live `/v3/api-docs`) — Postman
-   generates a collection from it.
-2. **Use the project's update-postman command** (`.claude/commands/update-postman.md`)
-   to build/refresh the collection from the current endpoints.
+## Layout
 
-## Suggested collection layout
-
-- `Auth` — register, login, me
-- `Catalog` — search, by-number, list, inventory import, parts
+- `Auth` — register, login (saves token), me
+- `Catalog` — list, search, by-number, import, inventory import, parts,
+  missing-parts, **compare** (`GET /api/v1/sets/compare?a=&b=&category=`)
 - `Collection - Sets` — add, list, update, delete
 - `Collection - Parts` — add, list, update, delete
 
-Store the JWT in a `{{token}}` collection variable and set the `Authorization`
-header at the collection level for the `Collection` folders.
+The `category` query param on **Compare** is included but disabled by default;
+enable it to filter lines by `ONLY_A`, `ONLY_B`, or `BOTH`.
+
+## Keeping it current
+
+Regenerate from the live spec (`/v3/api-docs`) or [`../openapi.yaml`](../openapi.yaml)
+when endpoints change, or edit this collection directly. No real secrets or
+Rebrickable API keys belong in these files — credentials live in the
+environment as placeholders.
