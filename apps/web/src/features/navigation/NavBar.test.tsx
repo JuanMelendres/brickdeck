@@ -49,6 +49,10 @@ describe("NavBar", () => {
       "href",
       "/sets",
     );
+    expect(screen.getByRole("link", { name: /compare/i })).toHaveAttribute(
+      "href",
+      "/compare",
+    );
   });
 
   it("shows login and sign up links when unauthenticated", () => {
