@@ -28,6 +28,9 @@ export function NavBar() {
         <Button component={Link} href="/sets" color="inherit">
           Sets
         </Button>
+        <Button component={Link} href="/compare" color="inherit">
+          Compare
+        </Button>
 
         <Box sx={{ flexGrow: 1 }} />
 
