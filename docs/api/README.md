@@ -10,7 +10,7 @@ BrickDeck exposes a REST/JSON API from `apps/api`.
 | Swagger UI | `/swagger-ui/index.html` | Interactive, "try it out". |
 | Static OpenAPI | [`openapi.yaml`](./openapi.yaml) | Hand-maintained summary for offline/portfolio use. |
 | Endpoint reference | [`../architecture/api-design.md`](../architecture/api-design.md) | Human-readable contract + conventions. |
-| Postman collection | [`postman/`](./postman/) | TODO — not yet exported. |
+| Postman collection | [`postman/`](./postman/) | Auth, Catalog (incl. compare), Collection sets/parts. Import with the local environment. |
 
 Local base URL: `http://localhost:8080`.
 
