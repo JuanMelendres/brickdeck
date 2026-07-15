@@ -289,6 +289,82 @@ paths:
         "401": { description: Unauthorized }
         "404": { description: Not found or not owned }
 
+  /api/v1/price-alerts:
+    post:
+      tags: [Pricing]
+      summary: Create a price-alert rule on a wishlist set (auth)
+      description: >-
+        Creates an alert rule for a set in the user's WISHLIST. thresholdValue
+        is required (positive) for BELOW_TARGET_PRICE and PERCENT_BELOW_AVERAGE
+        (percent in (0, 100]); ignored for AT_OR_BELOW_LOWEST. Rules are
+        evaluated when a price snapshot is added.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddPriceAlertRuleRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAlertRuleResponse" }
+        "400": { description: Invalid input or threshold }
+        "401": { description: Unauthorized }
+        "404": { description: Set not in the user's wishlist }
+    get:
+      tags: [Pricing]
+      summary: List the user's alert rules (paginated)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PagePriceAlertRuleResponse" }
+        "401": { description: Unauthorized }
+  /api/v1/price-alerts/{id}:
+    delete:
+      tags: [Pricing]
+      summary: Delete an alert rule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "204": { description: Deleted }
+        "401": { description: Unauthorized }
+        "404": { description: Not found or not owned }
+  /api/v1/price-alerts/triggered:
+    get:
+      tags: [Pricing]
+      summary: List triggered alerts, newest first (paginated)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PageTriggeredAlertResponse" }
+        "401": { description: Unauthorized }
+  /api/v1/price-alerts/triggered/{id}:
+    delete:
+      tags: [Pricing]
+      summary: Dismiss a triggered alert
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "204": { description: Dismissed }
+        "401": { description: Unauthorized }
+        "404": { description: Not found or not owned }
+
   /api/v1/collection/sets:
     post:
       tags: [Collection]
@@ -639,6 +715,53 @@ components:
         numberOfParts: { type: integer }
         pricePerPiece: { type: number }
         candidate: { $ref: "#/components/schemas/CandidateEvaluation" }
+    PriceAlertType:
+      type: string
+      enum: [BELOW_TARGET_PRICE, PERCENT_BELOW_AVERAGE, AT_OR_BELOW_LOWEST]
+    AddPriceAlertRuleRequest:
+      type: object
+      required: [setNumber, currency, type]
+      properties:
+        setNumber: { type: string }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        type: { $ref: "#/components/schemas/PriceAlertType" }
+        thresholdValue: { type: number, description: "Required (>0) for target/percent; percent in (0,100]; ignored for lowest" }
+    PriceAlertRuleResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        setNumber: { type: string }
+        currency: { type: string }
+        type: { $ref: "#/components/schemas/PriceAlertType" }
+        thresholdValue: { type: number }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+    PagePriceAlertRuleResponse:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            content:
+              type: array
+              items: { $ref: "#/components/schemas/PriceAlertRuleResponse" }
+    TriggeredAlertResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ruleId: { type: string, format: uuid }
+        setNumber: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        message: { type: string }
+        triggeredAt: { type: string, format: date-time }
+    PageTriggeredAlertResponse:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            content:
+              type: array
+              items: { $ref: "#/components/schemas/TriggeredAlertResponse" }
     AddUserSetRequest:
       type: object
       required: [setNumber]
