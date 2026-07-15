@@ -19,7 +19,7 @@
 - `Catalog` — list, search, by-number, import, inventory import, parts,
   missing-parts, **compare** (`GET /api/v1/sets/compare?a=&b=&category=`)
 - `Recommendations` — buildable wishlist sets (`GET /api/v1/recommendations/buildable`)
-- `Pricing` — add/list/delete price snapshots, price analysis + deal verdict
+- `Pricing` — add/list/delete price snapshots, price analysis + deal verdict, alert rules (create/list/delete), triggered alerts
 - `Collection - Sets` — add, list, update, delete
 - `Collection - Parts` — add, list, update, delete
 

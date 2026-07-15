@@ -278,6 +278,70 @@
             },
             "description": "Min/avg/max/latest + price-per-piece over your snapshots; candidatePrice adds a deal verdict."
           }
+        },
+        {
+          "name": "Create alert rule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('priceAlertRuleId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/price-alerts", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-alerts"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setNumber\": \"{{setNumber}}\",\n  \"currency\": \"USD\",\n  \"type\": \"BELOW_TARGET_PRICE\",\n  \"thresholdValue\": 100.00\n}"
+            },
+            "description": "Set must be in your WISHLIST. thresholdValue required for target/percent; percent in (0,100]; ignored for AT_OR_BELOW_LOWEST."
+          }
+        },
+        {
+          "name": "List alert rules",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-alerts?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-alerts"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete alert rule",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/price-alerts/{{priceAlertRuleId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-alerts", "{{priceAlertRuleId}}"] }
+          }
+        },
+        {
+          "name": "List triggered alerts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-alerts/triggered?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-alerts", "triggered"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Alerts fired when a recorded price met a rule. Add a snapshot below your target to see one."
+          }
         }
       ]
     },

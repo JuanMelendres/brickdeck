@@ -78,7 +78,8 @@ Status: In Progress (backend slice 1 done)
 - Decision — Done: ADR-011 (user-submitted snapshots first, BrickLink next; scraping excluded). Spike + slice-1 TDD in `docs/superpowers/specs/`.
 - Backend slice 1 (manual snapshots + deal detection) — Done: `price_snapshots` table (V8, source-agnostic), `pricing` package. Authenticated, owner-scoped `POST/GET/DELETE /api/v1/price-snapshots` + `GET /api/v1/sets/{setNumber}/price-analysis?currency=&candidatePrice=` → min/avg/max/latest + price-per-piece + deal verdict (GREAT_DEAL/GOOD_DEAL/FAIR/POOR). Per-currency; strict 404 when no snapshots. Shared `PriceAnalysisService` is pure.
 - Frontend price UI (slice 2) — Done: on the set-detail page (auth-gated) — add-snapshot form (amount/currency/condition/date/store) + price-analysis panel (min/avg/max/latest, price-per-piece, candidate-price deal verdict). Consumes the pricing endpoints.
-- Next: BrickLink adapter (POC-gated) + wishlist price alerts.
+- Wishlist price alerts (backend) — Done: `price_alert_rules` + `triggered_alerts` (V9). Owner-scoped `POST/GET/DELETE /api/v1/price-alerts` (rules on WISHLIST sets; types BELOW_TARGET_PRICE / PERCENT_BELOW_AVERAGE / AT_OR_BELOW_LOWEST) + `GET/DELETE /api/v1/price-alerts/triggered`. Rules evaluated in-app when a snapshot is added (`PriceAlertRuleEvaluator` pure; `PriceAlertService.evaluateForSnapshot`). Spec/plan in `docs/superpowers/specs` + `docs/superpowers/plans`.
+- Next: frontend alerts UI (create rules + triggered-alerts list/bell); later BrickLink adapter (POC-gated) + email delivery + scheduled scan.
 
 ## Phase 7 — AI-Assisted Classification
 

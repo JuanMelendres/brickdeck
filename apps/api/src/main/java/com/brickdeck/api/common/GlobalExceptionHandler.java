@@ -40,6 +40,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
