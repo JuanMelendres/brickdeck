@@ -27,6 +27,7 @@ Docs-as-code for BrickDeck. Start here.
 - [ADR-008 Stateless JWT auth](./decisions/ADR-008-jwt-stateless-auth.md)
 - [ADR-009 Hexagonal + DDD packages](./decisions/ADR-009-hexagonal-ddd-packages.md)
 - [ADR-010 Git-flow / develop default](./decisions/ADR-010-git-flow-develop-default.md)
+- [ADR-011 Price data sourcing](./decisions/ADR-011-price-data-sourcing.md)
 
 ## API
 - [API docs & conventions](./api/README.md)
