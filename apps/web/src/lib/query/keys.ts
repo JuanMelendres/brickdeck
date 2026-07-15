@@ -19,6 +19,16 @@ export const queryKeys = {
       page: number,
     ) => ["sets", "compare", a, b, category, page] as const,
   },
+  pricing: {
+    all: ["pricing"] as const,
+    analysis: (
+      setNumber: string,
+      currency: string,
+      candidatePrice: number | null,
+    ) => ["pricing", "analysis", setNumber, currency, candidatePrice] as const,
+    snapshots: (setNumber: string, page: number) =>
+      ["pricing", "snapshots", setNumber, page] as const,
+  },
   recommendations: {
     all: ["recommendations"] as const,
     buildable: (buildableOnly: boolean, page: number) =>

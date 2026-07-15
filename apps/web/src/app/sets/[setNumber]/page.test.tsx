@@ -83,9 +83,9 @@ describe("SetDetailPage", () => {
       await screen.findByRole("heading", { name: "Millennium Falcon" }),
     ).toBeInTheDocument();
     expect(await screen.findByText("Brick 2 x 4")).toBeInTheDocument();
-    // Missing-pieces section prompts unauthenticated users to log in.
-    expect(
-      await screen.findByRole("link", { name: /log in/i }),
-    ).toHaveAttribute("href", "/login");
+    // Missing-pieces and price-tracking sections prompt unauthenticated users to log in.
+    const loginLinks = await screen.findAllByRole("link", { name: /log in/i });
+    expect(loginLinks.length).toBeGreaterThanOrEqual(1);
+    loginLinks.forEach((link) => expect(link).toHaveAttribute("href", "/login"));
   });
 });
