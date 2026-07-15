@@ -88,6 +88,9 @@ describe("NavBar", () => {
       screen.getByRole("link", { name: /recommendations/i }),
     ).toHaveAttribute("href", "/recommendations");
     expect(
+      screen.getByRole("link", { name: /alerts/i }),
+    ).toHaveAttribute("href", "/alerts");
+    expect(
       screen.queryByRole("link", { name: /log in/i }),
     ).not.toBeInTheDocument();
   });
