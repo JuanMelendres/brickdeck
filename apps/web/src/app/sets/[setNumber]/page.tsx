@@ -20,6 +20,7 @@ import { useSetParts } from "@/features/sets/useSetParts";
 import { useImportInventory } from "@/features/sets/useImportInventory";
 import { MissingPartsPanel } from "@/features/missingpieces/MissingPartsPanel";
 import { useMissingParts } from "@/features/missingpieces/useMissingParts";
+import { PriceTrackingSection } from "@/features/pricing/PriceTrackingSection";
 import { useAuth } from "@/features/auth/useAuth";
 
 const PARTS_PAGE_SIZE = 50;
@@ -102,6 +103,16 @@ export default function SetDetailPage() {
             missingOnly={missingOnly}
             onMissingOnlyChange={handleMissingOnlyChange}
             onPageChange={setMissingPage}
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Price tracking
+          </Typography>
+          <PriceTrackingSection
+            setNumber={setNumber}
+            isAuthenticated={isAuthenticated}
           />
         </Box>
       </Stack>
