@@ -6,11 +6,9 @@ import com.brickdeck.api.catalog.entity.Part;
 import com.brickdeck.api.catalog.entity.SetPart;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
 import com.brickdeck.api.catalog.repository.SetPartRepository;
-import com.brickdeck.api.collection.entity.CollectionStatus;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.missingpieces.dto.MissingPartsReport;
-import com.brickdeck.api.missingpieces.repository.OwnedInventoryRepository;
-import com.brickdeck.api.missingpieces.repository.PartColorQuantity;
+import com.brickdeck.api.missingpieces.service.OwnedInventoryService.PartColorKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +33,7 @@ class MissingPartsServiceTest {
     @Mock
     private SetPartRepository setPartRepository;
     @Mock
-    private OwnedInventoryRepository ownedInventoryRepository;
+    private OwnedInventoryService ownedInventoryService;
 
     @InjectMocks
     private MissingPartsService service;
@@ -63,10 +60,8 @@ class MissingPartsServiceTest {
                 .thenReturn(List.of(
                         setPart(partA, red, 4),
                         setPart(partB, blue, 2)));
-        when(ownedInventoryRepository.sumLoosePartsByUser(userId))
-                .thenReturn(List.of(pcq(partA, red, 1)));
-        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
-                .thenReturn(List.of(pcq(partA, red, 1), pcq(partB, blue, 2)));
+        when(ownedInventoryService.buildOwnedMap(userId))
+                .thenReturn(Map.of(key(partA, red), 2L, key(partB, blue), 2L));
 
         MissingPartsReport report = service.computeMissingParts("75257-1", userId, false, 0, 50);
 
@@ -96,10 +91,8 @@ class MissingPartsServiceTest {
                 .thenReturn(Optional.of(new BrickSet()));
         when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("100-1"))
                 .thenReturn(List.of(setPart(partA, red, 2)));
-        when(ownedInventoryRepository.sumLoosePartsByUser(userId))
-                .thenReturn(List.of(pcq(partA, red, 5)));
-        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
-                .thenReturn(List.of());
+        when(ownedInventoryService.buildOwnedMap(userId))
+                .thenReturn(Map.of(key(partA, red), 5L));
 
         MissingPartsReport report = service.computeMissingParts("100-1", userId, false, 0, 50);
 
@@ -114,10 +107,8 @@ class MissingPartsServiceTest {
                 .thenReturn(Optional.of(new BrickSet()));
         when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("200-1"))
                 .thenReturn(List.of(setPart(partA, red, 4), setPart(partB, blue, 2)));
-        when(ownedInventoryRepository.sumLoosePartsByUser(userId))
-                .thenReturn(List.of(pcq(partB, blue, 2))); // partB complete, partA missing
-        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
-                .thenReturn(List.of());
+        when(ownedInventoryService.buildOwnedMap(userId))
+                .thenReturn(Map.of(key(partB, blue), 2L)); // partB complete, partA missing
 
         MissingPartsReport report = service.computeMissingParts("200-1", userId, true, 0, 50);
 
@@ -134,9 +125,7 @@ class MissingPartsServiceTest {
                 .thenReturn(Optional.of(new BrickSet()));
         when(setPartRepository.findByBrickSet_ExternalSetNumberAndSpareFalse("300-1"))
                 .thenReturn(List.of(setPart(partA, red, 4), setPart(partB, blue, 2)));
-        when(ownedInventoryRepository.sumLoosePartsByUser(userId)).thenReturn(List.of());
-        when(ownedInventoryRepository.sumOwnedSetPartsByUser(eq(userId), any()))
-                .thenReturn(List.of());
+        when(ownedInventoryService.buildOwnedMap(userId)).thenReturn(Map.of());
 
         MissingPartsReport page0 = service.computeMissingParts("300-1", userId, false, 0, 1);
         assertThat(page0.lines()).hasSize(1);
@@ -201,22 +190,7 @@ class MissingPartsServiceTest {
         return sp;
     }
 
-    private PartColorQuantity pcq(Part part, Color color, long quantity) {
-        return new PartColorQuantity() {
-            @Override
-            public UUID getPartId() {
-                return part.getId();
-            }
-
-            @Override
-            public UUID getColorId() {
-                return color.getId();
-            }
-
-            @Override
-            public long getTotalQuantity() {
-                return quantity;
-            }
-        };
+    private PartColorKey key(Part part, Color color) {
+        return new PartColorKey(part.getId(), color.getId());
     }
 }

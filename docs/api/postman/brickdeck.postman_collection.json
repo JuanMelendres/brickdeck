@@ -191,6 +191,28 @@
       ]
     },
     {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "Buildable wishlist sets",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations/buildable?buildableOnly=false&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations", "buildable"],
+              "query": [
+                { "key": "buildableOnly", "value": "false", "description": "true = only sets you can build right now" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Authenticated. Scores the user's WISHLIST sets by buildability from owned inventory, most-complete first."
+          }
+        }
+      ]
+    },
+    {
       "name": "Collection - Sets",
       "item": [
         {

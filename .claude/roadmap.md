@@ -63,9 +63,11 @@ Success criterion met: a user can visually compare two sets' parts and see how s
 
 ## Phase 5 — Build Recommendation Engine
 
-Status: Not Started
+Status: In Progress (backend slice 1 done)
 
-- Recommend buildable / almost-buildable sets from inventory
+- Backend engine + endpoint (slice 1) — Done: `GET /api/v1/recommendations/buildable?buildableOnly=&page=&size=` (authenticated) scores the user's WISHLIST sets by how buildable they are from owned inventory (loose parts + parts of OWNED/BUILT/IN_PROGRESS sets), most-complete first; skips wishlist sets with no imported inventory; `buildableOnly` filter; `PageResponse<BuildableSetRecommendation>`. Extracted shared `OwnedInventoryService` (owned-map + `PartColorKey`) reused by the missing-pieces engine.
+- Frontend recommendations page — Not started.
+- Later: widen candidate scope beyond wishlist (whole catalog with batching/limits); almost-buildable thresholds.
 
 ## Phase 6 — Price Tracking and Deals
 

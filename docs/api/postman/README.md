@@ -18,6 +18,7 @@
 - `Auth` — register, login (saves token), me
 - `Catalog` — list, search, by-number, import, inventory import, parts,
   missing-parts, **compare** (`GET /api/v1/sets/compare?a=&b=&category=`)
+- `Recommendations` — buildable wishlist sets (`GET /api/v1/recommendations/buildable`)
 - `Collection - Sets` — add, list, update, delete
 - `Collection - Parts` — add, list, update, delete
 
