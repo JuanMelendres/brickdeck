@@ -19,6 +19,11 @@ export const queryKeys = {
       page: number,
     ) => ["sets", "compare", a, b, category, page] as const,
   },
+  alerts: {
+    all: ["alerts"] as const,
+    rules: (page: number) => ["alerts", "rules", page] as const,
+    triggered: (page: number) => ["alerts", "triggered", page] as const,
+  },
   pricing: {
     all: ["pricing"] as const,
     analysis: (

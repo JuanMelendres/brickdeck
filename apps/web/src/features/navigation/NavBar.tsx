@@ -42,6 +42,9 @@ export function NavBar() {
             <Button component={Link} href="/recommendations" color="inherit">
               Recommendations
             </Button>
+            <Button component={Link} href="/alerts" color="inherit">
+              Alerts
+            </Button>
             <Typography variant="body2" color="text.secondary">
               {user?.displayName || user?.email}
             </Typography>
