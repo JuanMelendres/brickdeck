@@ -17,6 +17,7 @@ tags:
   - name: Catalog
   - name: Collection
   - name: Recommendations
+  - name: Pricing
 paths:
   /api/v1/health:
     get:
@@ -218,6 +219,75 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/PageBuildableSetRecommendation" }
         "401": { description: Unauthorized }
+  /api/v1/sets/{setNumber}/price-analysis:
+    get:
+      tags: [Pricing]
+      summary: Price analysis and deal verdict for a set (auth)
+      description: >-
+        Aggregates the authenticated user's price snapshots for a set in one
+        currency (min / average / max / latest and price-per-piece). When
+        candidatePrice is given, adds a deal verdict (GREAT_DEAL / GOOD_DEAL /
+        FAIR / POOR). 404 if the user has no snapshots for that set and currency.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: setNumber, in: path, required: true, schema: { type: string } }
+        - { name: currency, in: query, required: true, schema: { type: string, pattern: "^[A-Z]{3}$" } }
+        - { name: candidatePrice, in: query, schema: { type: number } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceAnalysisResponse" }
+        "400": { description: Missing or invalid currency }
+        "401": { description: Unauthorized }
+        "404": { description: No snapshots for that set and currency }
+
+  /api/v1/price-snapshots:
+    post:
+      tags: [Pricing]
+      summary: Record a price snapshot (auth)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddPriceSnapshotRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceSnapshotResponse" }
+        "400": { description: Invalid input }
+        "401": { description: Unauthorized }
+        "404": { description: Set not found or importable }
+    get:
+      tags: [Pricing]
+      summary: List the user's price snapshots (paginated)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: setNumber, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 20 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PagePriceSnapshotResponse" }
+        "401": { description: Unauthorized }
+  /api/v1/price-snapshots/{id}:
+    delete:
+      tags: [Pricing]
+      summary: Delete a price snapshot
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "204": { description: Deleted }
+        "401": { description: Unauthorized }
+        "404": { description: Not found or not owned }
 
   /api/v1/collection/sets:
     post:
@@ -507,6 +577,68 @@ components:
             content:
               type: array
               items: { $ref: "#/components/schemas/BuildableSetRecommendation" }
+    PriceCondition:
+      type: string
+      enum: [NEW, USED]
+    PriceSource:
+      type: string
+      enum: [MANUAL]
+    DealVerdict:
+      type: string
+      enum: [GREAT_DEAL, GOOD_DEAL, FAIR, POOR]
+    AddPriceSnapshotRequest:
+      type: object
+      required: [setNumber, amount, currency, condition, observedAt]
+      properties:
+        setNumber: { type: string }
+        amount: { type: number }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        condition: { $ref: "#/components/schemas/PriceCondition" }
+        observedAt: { type: string, format: date }
+        store: { type: string, maxLength: 255 }
+        url: { type: string, maxLength: 1024 }
+    PriceSnapshotResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        setNumber: { type: string }
+        amount: { type: number }
+        currency: { type: string }
+        condition: { $ref: "#/components/schemas/PriceCondition" }
+        source: { $ref: "#/components/schemas/PriceSource" }
+        observedAt: { type: string, format: date }
+        store: { type: string }
+        url: { type: string }
+        createdAt: { type: string, format: date-time }
+    PagePriceSnapshotResponse:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            content:
+              type: array
+              items: { $ref: "#/components/schemas/PriceSnapshotResponse" }
+    CandidateEvaluation:
+      type: object
+      properties:
+        amount: { type: number }
+        pricePerPiece: { type: number }
+        percentBelowAverage: { type: number }
+        atOrBelowLowest: { type: boolean }
+        verdict: { $ref: "#/components/schemas/DealVerdict" }
+    PriceAnalysisResponse:
+      type: object
+      properties:
+        setNumber: { type: string }
+        currency: { type: string }
+        snapshotCount: { type: integer }
+        minAmount: { type: number }
+        averageAmount: { type: number }
+        maxAmount: { type: number }
+        latestAmount: { type: number }
+        numberOfParts: { type: integer }
+        pricePerPiece: { type: number }
+        candidate: { $ref: "#/components/schemas/CandidateEvaluation" }
     AddUserSetRequest:
       type: object
       required: [setNumber]

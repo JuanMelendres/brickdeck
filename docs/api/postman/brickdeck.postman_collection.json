@@ -213,6 +213,75 @@
       ]
     },
     {
+      "name": "Pricing",
+      "item": [
+        {
+          "name": "Add price snapshot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('priceSnapshotId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/price-snapshots", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-snapshots"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setNumber\": \"{{setNumber}}\",\n  \"amount\": 129.99,\n  \"currency\": \"USD\",\n  \"condition\": \"NEW\",\n  \"observedAt\": \"2026-01-10\",\n  \"store\": \"LEGO Store\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List price snapshots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-snapshots?setNumber={{setNumber}}&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-snapshots"],
+              "query": [
+                { "key": "setNumber", "value": "{{setNumber}}" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete price snapshot",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/price-snapshots/{{priceSnapshotId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-snapshots", "{{priceSnapshotId}}"] }
+          }
+        },
+        {
+          "name": "Price analysis / deal verdict",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/{{setNumber}}/price-analysis?currency=USD&candidatePrice=119.99",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "{{setNumber}}", "price-analysis"],
+              "query": [
+                { "key": "currency", "value": "USD" },
+                { "key": "candidatePrice", "value": "119.99", "description": "Optional: evaluate this price for a deal verdict" }
+              ]
+            },
+            "description": "Min/avg/max/latest + price-per-piece over your snapshots; candidatePrice adds a deal verdict."
+          }
+        }
+      ]
+    },
+    {
       "name": "Collection - Sets",
       "item": [
         {
