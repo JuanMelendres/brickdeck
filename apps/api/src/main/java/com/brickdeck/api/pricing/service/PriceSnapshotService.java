@@ -24,12 +24,15 @@ public class PriceSnapshotService {
 
     private final PriceSnapshotRepository priceSnapshotRepository;
     private final BrickSetService brickSetService;
+    private final PriceAlertService priceAlertService;
 
     public PriceSnapshotService(
             PriceSnapshotRepository priceSnapshotRepository,
-            BrickSetService brickSetService) {
+            BrickSetService brickSetService,
+            PriceAlertService priceAlertService) {
         this.priceSnapshotRepository = priceSnapshotRepository;
         this.brickSetService = brickSetService;
+        this.priceAlertService = priceAlertService;
     }
 
     @Transactional
@@ -47,7 +50,9 @@ public class PriceSnapshotService {
         snapshot.setUrl(request.url());
         snapshot.setObservedAt(request.observedAt());
 
-        return toResponse(priceSnapshotRepository.save(snapshot));
+        PriceSnapshot saved = priceSnapshotRepository.save(snapshot);
+        priceAlertService.evaluateForSnapshot(owner, saved);
+        return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
