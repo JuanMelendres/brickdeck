@@ -73,9 +73,11 @@ Success criterion met: a user can see which of their wishlist sets they can buil
 
 ## Phase 6 — Price Tracking and Deals
 
-Status: Not Started
+Status: In Progress (backend slice 1 done)
 
-- Price snapshots, history, discount detection, wishlist alerts (APIs/feeds, no aggressive scraping)
+- Decision — Done: ADR-011 (user-submitted snapshots first, BrickLink next; scraping excluded). Spike + slice-1 TDD in `docs/superpowers/specs/`.
+- Backend slice 1 (manual snapshots + deal detection) — Done: `price_snapshots` table (V8, source-agnostic), `pricing` package. Authenticated, owner-scoped `POST/GET/DELETE /api/v1/price-snapshots` + `GET /api/v1/sets/{setNumber}/price-analysis?currency=&candidatePrice=` → min/avg/max/latest + price-per-piece + deal verdict (GREAT_DEAL/GOOD_DEAL/FAIR/POOR). Per-currency; strict 404 when no snapshots. Shared `PriceAnalysisService` is pure.
+- Next: frontend price-tracking UI (add snapshot + analysis panel); later BrickLink adapter (POC-gated) + wishlist price alerts.
 
 ## Phase 7 — AI-Assisted Classification
 
