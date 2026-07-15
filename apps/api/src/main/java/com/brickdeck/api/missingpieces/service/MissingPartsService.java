@@ -6,45 +6,33 @@ import com.brickdeck.api.catalog.entity.SetPart;
 import com.brickdeck.api.catalog.repository.BrickSetRepository;
 import com.brickdeck.api.catalog.repository.SetPartRepository;
 import com.brickdeck.api.catalog.service.SetNumbers;
-import com.brickdeck.api.collection.entity.CollectionStatus;
 import com.brickdeck.api.common.ResourceNotFoundException;
 import com.brickdeck.api.missingpieces.dto.MissingPartLine;
 import com.brickdeck.api.missingpieces.dto.MissingPartsReport;
-import com.brickdeck.api.missingpieces.repository.OwnedInventoryRepository;
-import com.brickdeck.api.missingpieces.repository.PartColorQuantity;
+import com.brickdeck.api.missingpieces.service.OwnedInventoryService.PartColorKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class MissingPartsService {
 
-    /** Collection statuses that mean the user physically owns the set's parts. */
-    private static final Set<CollectionStatus> OWNED_STATUSES =
-            EnumSet.of(
-                    CollectionStatus.OWNED,
-                    CollectionStatus.BUILT,
-                    CollectionStatus.IN_PROGRESS);
-
     private final BrickSetRepository brickSetRepository;
     private final SetPartRepository setPartRepository;
-    private final OwnedInventoryRepository ownedInventoryRepository;
+    private final OwnedInventoryService ownedInventoryService;
 
     public MissingPartsService(
             BrickSetRepository brickSetRepository,
             SetPartRepository setPartRepository,
-            OwnedInventoryRepository ownedInventoryRepository) {
+            OwnedInventoryService ownedInventoryService) {
         this.brickSetRepository = brickSetRepository;
         this.setPartRepository = setPartRepository;
-        this.ownedInventoryRepository = ownedInventoryRepository;
+        this.ownedInventoryService = ownedInventoryService;
     }
 
     /** Lines ordered by most-missing first, then part number, then color. */
@@ -76,9 +64,7 @@ public class MissingPartsService {
                             + " (import the inventory first)");
         }
 
-        Map<PartColorKey, Long> owned = new HashMap<>();
-        accumulate(owned, ownedInventoryRepository.sumLoosePartsByUser(userId));
-        accumulate(owned, ownedInventoryRepository.sumOwnedSetPartsByUser(userId, OWNED_STATUSES));
+        Map<PartColorKey, Long> owned = ownedInventoryService.buildOwnedMap(userId);
 
         List<MissingPartLine> lines = new ArrayList<>(required.size());
         int totalRequired = 0;
@@ -140,15 +126,4 @@ public class MissingPartsService {
                 first, last);
     }
 
-    private void accumulate(Map<PartColorKey, Long> owned, List<PartColorQuantity> rows) {
-        for (PartColorQuantity row : rows) {
-            owned.merge(
-                    new PartColorKey(row.getPartId(), row.getColorId()),
-                    row.getTotalQuantity(),
-                    Long::sum);
-        }
-    }
-
-    private record PartColorKey(UUID partId, UUID colorId) {
-    }
 }
