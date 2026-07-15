@@ -39,6 +39,9 @@ export function NavBar() {
             <Button component={Link} href="/collection" color="inherit">
               Collection
             </Button>
+            <Button component={Link} href="/recommendations" color="inherit">
+              Recommendations
+            </Button>
             <Typography variant="body2" color="text.secondary">
               {user?.displayName || user?.email}
             </Typography>

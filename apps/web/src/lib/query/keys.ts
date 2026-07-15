@@ -19,6 +19,11 @@ export const queryKeys = {
       page: number,
     ) => ["sets", "compare", a, b, category, page] as const,
   },
+  recommendations: {
+    all: ["recommendations"] as const,
+    buildable: (buildableOnly: boolean, page: number) =>
+      ["recommendations", "buildable", buildableOnly, page] as const,
+  },
   collection: {
     all: ["collection"] as const,
     setsAll: ["collection", "sets"] as const,
