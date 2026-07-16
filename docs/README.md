@@ -36,6 +36,9 @@ Docs-as-code for BrickDeck. Start here.
 ## Testing
 - [Strategy](./testing/testing-strategy.md) · [Test plan](./testing/test-plan.md) · [Unit](./testing/unit-testing.md) · [Integration](./testing/integration-testing.md)
 
+## Security
+- [Vulnerability audit — `apps/api`](./security/spring-vulnerability-audit-api.md) — dependency & container audit (2026-07-16).
+
 ## Development
 - [Setup](./development/setup.md) · [Environment variables](./development/environment-variables.md) · [Coding standards](./development/coding-standards.md) · [Contribution guide](./development/contribution-guide.md)
 

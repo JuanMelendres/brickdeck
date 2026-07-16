@@ -1,0 +1,76 @@
+# Dependency update automation.
+#
+# Context: docs/security/spring-vulnerability-audit-api.md — the 2026-07-16 audit
+# found the repository had no ongoing dependency scanning at all, making every audit
+# a point-in-time snapshot. This is what turns it into continuous detection.
+#
+# Note the two ecosystems are deliberately separate: `apps/api` (Maven) and
+# `apps/web` (npm/pnpm) have different reviewers and different risk profiles.
+
+version: 2
+
+updates:
+  # Backend — Spring Boot API.
+  # Most versions here are managed by the Spring Boot BOM rather than declared
+  # directly, so Dependabot will mainly surface the parent, the plugins, and the
+  # handful of directly-pinned libraries (jjwt, springdoc).
+  - package-ecosystem: maven
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Spring Boot's modules move together; one PR per weekly patch train.
+      spring-boot:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework:*"
+          - "org.springframework.security:*"
+      test-dependencies:
+        patterns:
+          - "org.junit*"
+          - "org.mockito:*"
+          - "org.assertj:*"
+
+  # Frontend — Next.js app. Out of scope for the backend audit; listed here so the
+  # unassessed half of the repo at least gets automated advisories.
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      mui:
+        patterns:
+          - "@mui/*"
+          - "@emotion/*"
+
+  # CI actions — pinned by major tag today (actions/checkout@v4 etc.), so this
+  # mostly catches majors and any action that gets deprecated.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "chore(ci)"
