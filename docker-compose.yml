@@ -10,7 +10,9 @@ services:
       POSTGRES_USER: brickdeck
       POSTGRES_PASSWORD: brickdeck
     ports:
-      - "5433:5432"
+      # Loopback-only: the default 0.0.0.0 bind exposes this database to the
+      # whole local network with the dev credentials above.
+      - "127.0.0.1:5433:5432"
     volumes:
       - brickdeck_postgres_data:/var/lib/postgresql/data
 
