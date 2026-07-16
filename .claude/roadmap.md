@@ -86,9 +86,15 @@ Success criteria: user sees whether a current price is a good deal, and gets ale
 
 ## Phase 7 — AI-Assisted Classification
 
-Status: Not Started
+Status: Spike proposed (decision pending)
 
 - Photo → part/color suggestion + confidence + user confirm
+- Spike — Done (proposed): `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md`. Recommends Claude vision (`claude-opus-4-8`) via `anthropic-java` behind a `PartClassifier` port for slice 1, with Brickognize (LEGO-specialist API) benchmarked head-to-head in a one-day POC. Rules out a custom CNN (dataset/GPU/MLOps) and generic cloud vision (no identifier grounding) as first slices. **No Python AI service needed** — the Java SDK does vision + structured outputs, so slice 1 is one more `external.*` adapter. Colors ground via a structured-output enum from the `colors` table; part numbers are validated claims (`resolutionStatus`), not resolved refs.
+- POC gate before any production code: top-5 part hit rate >= 60% and color hit rate >= 80% on a 15–20 real-brick eval set (the eval set outlives the POC and makes later source swaps measurable).
+- Proposed slices: 0 — single-part find-or-import (`RebrickableClient.getPart/getColor`); 1 — `classification` package + `external.anthropic` adapter, `POST /api/v1/classify/part`, transient photos, nullable `part_img_url` for reference images; 2 — frontend capture + confirm (client-side downscale) wired to `POST /api/v1/collection/parts`.
+- **Slice 0 is a hard prerequisite, not optional polish:** parts only enter the catalog via set-inventory import, so a correct suggestion for a never-imported part 404s at save — the feature would fail on exactly the long-tail loose pieces it exists to serve.
+- ADR-012 candidate: AI part classification — vendor vision API first, no Python AI service in Phase 7; supersedes the AI half of ADR-006.
+- Next: approve direction + POC gate, build the eval set, run the POC, record results in the spike's section 12, then ADR-012 and a TDD for slice 0.
 
 ## Phase 8 — Productization
 

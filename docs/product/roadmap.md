@@ -181,6 +181,14 @@ Goal: help users identify and organize loose pieces using images.
 - Ask user to confirm result
 - Save confirmed piece to inventory
 
+### Technical Considerations
+
+- Spike: `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md` (proposed; decision pending).
+- Proposed source: Claude vision via the Anthropic Java SDK, behind a `PartClassifier` port — no Python AI service in this phase.
+- Single-part find-or-import is a prerequisite: parts only enter the catalog via set-inventory import today, so suggestions for never-imported parts cannot be saved.
+- Every result must carry confidence and require user confirmation. No silent auto-save.
+- User photos are transient in the first slice — classify and discard.
+
 ### Later Enhancements
 
 - Multi-piece detection
