@@ -24,7 +24,7 @@ works for the backend. `apps/web` reads `NEXT_PUBLIC_*` vars from its own
 | `REBRICKABLE_BASE_URL` | `https://rebrickable.com/api/v3` | Rebrickable API base URL. |
 | `REBRICKABLE_API_KEY` | _(empty)_ | Rebrickable API key — **required** for catalog import. |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated allowed browser origins for `/api/**`. |
-| `JWT_SECRET` | dev-only fallback | HS256 signing secret — **must be >= 32 bytes**; override everywhere. |
+| `JWT_SECRET` | _(none — **required**)_ | HS256 signing secret, **>= 32 characters**. No default: startup fails if unset or too short. |
 | `JWT_EXPIRATION_MINUTES` | `120` | JWT lifetime in minutes. |
 
 ## Frontend variables
