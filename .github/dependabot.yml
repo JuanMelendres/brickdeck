@@ -73,6 +73,18 @@ updates:
         patterns:
           - "@mui/*"
           - "@emotion/*"
+    ignore:
+      # Both blocked by eslint-config-next's lint stack, not our code:
+      #  - eslint 10: eslint-plugin-react (latest 7.37.5) peers eslint <=^9.7
+      #  - typescript 7: typescript-eslint@8 peers typescript <6.1.0 (crashes on TS 7)
+      # Our code is already clean under both (typecheck passes on TS 7); the block is
+      # upstream and lifts with a future Next release. Suppress the majors until then so
+      # they stop reopening on each 10.x / 7.x patch. Remove when Next ships an
+      # eslint-config-next with ESLint 10 / TS 7 support. Patch/minor still flow.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # CI actions — pinned by major tag today (actions/checkout@v4 etc.), so this
   # mostly catches majors and any action that gets deprecated.
