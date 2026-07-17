@@ -36,7 +36,20 @@ For request/response conventions, error codes, and auth details also see
 ### Health
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| GET | `/api/v1/health` | public | Liveness. |
+| GET | `/api/v1/health` | public | Liveness. Static `UP` — deliberately checks no dependencies. |
+| GET | `/actuator/health` | public | Readiness. Checks the datasource: `200 {"status":"UP"}` / `503 {"status":"DOWN"}`. |
+
+The split is intentional. **Liveness** answers "is the process alive?" and must not check
+dependencies — restarting the pod cannot fix a database outage, so a liveness probe that
+checks the database turns one outage into a restart loop. **Readiness** answers "can I
+serve traffic?" and must check them, so a pod with no database is pulled from the load
+balancer without being killed.
+
+Both are public by necessity: authenticating a health endpoint loads a user from the
+database, so a database outage would answer `401` instead of `DOWN` — failing exactly when
+a probe needs the truth. Only `/actuator/health` is exposed; the rest of actuator stays
+authenticated, and `show-details` keeps its `never` default, so the body is just
+`{"status":"UP"}` with no component or dependency detail.
 
 ### Auth
 | Method | Path | Auth | Body | Result |
