@@ -38,6 +38,9 @@
 		<jackson-bom.version>2.21.5</jackson-bom.version>
 		<!-- CVE-2025-48924: BOM manages 3.17.0; fixed in 3.18.0. -->
 		<commons-lang3.version>3.18.0</commons-lang3.version>
+		<!-- jjwt is not BOM-managed. Its three artifacts (api/impl/jackson) MUST
+		     share a version; a single property makes a split structurally impossible. -->
+		<jjwt.version>0.13.0</jjwt.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -63,18 +66,18 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
