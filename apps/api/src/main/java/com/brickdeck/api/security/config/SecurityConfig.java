@@ -30,7 +30,14 @@ public class SecurityConfig {
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/sets/compare",
-            "/health",
+            // Liveness (static) and readiness (checks the datasource). Both must be
+            // reachable without credentials: authenticating them loads a user from the
+            // database, so a database outage would answer 401 instead of DOWN - failing
+            // exactly when a probe needs the truth. Only /actuator/health is opened;
+            // the rest of actuator stays authenticated, and show-details keeps its
+            // `never` default so the body is just {"status":"UP"}.
+            "/api/v1/health",
+            "/actuator/health",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"

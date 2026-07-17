@@ -46,7 +46,7 @@ DDD + hexagonal: keep core catalog logic separate from infrastructure. Keep exte
 ### Packages & Resources
 - Base package: `com.brickdeck.api`
 - Main packages: `catalog` (`controller`, `service`, `repository`, `entity`, `dto`), `external.rebrickable` (`client`, `config`, `dto`), `common`, `health`
-- API resources: `/api/v1/sets` (read + find-or-import), set import endpoint, theme endpoints, `/health`
+- API resources: `/api/v1/sets` (read + find-or-import), set import endpoint, theme endpoints, `/api/v1/health`
 
 ### Completed backend features
 - Java 21 Spring Boot API, PostgreSQL + Docker Compose, Flyway migrations (init, Rebrickable metadata, theme external_id unique)
