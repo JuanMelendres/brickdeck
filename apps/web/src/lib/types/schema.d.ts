@@ -4,6 +4,70 @@
  */
 
 export interface paths {
+    "/api/v1/price-snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post: operations["add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/price-alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listRules"];
+        put?: never;
+        post: operations["createRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_1"];
+        put?: never;
+        post: operations["addSet"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_2"];
+        put?: never;
+        post: operations["addPart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/catalog/sets/{setNumber}/inventory/import": {
         parameters: {
             query?: never;
@@ -36,6 +100,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/collection/sets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch: operations["update"];
+        trace?: never;
+    };
+    "/api/v1/collection/parts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_1"];
+        options?: never;
+        head?: never;
+        patch: operations["update_1"];
+        trace?: never;
+    };
     "/api/v1/sets": {
         parameters: {
             query?: never;
@@ -44,6 +172,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sets/{setNumber}/price-analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analyze"];
         put?: never;
         post?: never;
         delete?: never;
@@ -68,6 +212,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sets/{setNumber}/missing-parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMissingParts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sets/search": {
         parameters: {
             query?: never;
@@ -84,6 +244,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sets/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["compare"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sets/by-number/{setNumber}": {
         parameters: {
             query?: never;
@@ -92,6 +268,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["findBySetNumber"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/buildable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buildable"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/price-alerts/triggered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTriggered"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,6 +340,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/catalog/themes/{id}": {
         parameters: {
             query?: never;
@@ -148,10 +372,154 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/price-snapshots/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/price-alerts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteRule"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/price-alerts/triggered/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["dismissTriggered"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddPriceSnapshotRequest: {
+            setNumber?: string;
+            amount: number;
+            currency?: string;
+            /** @enum {string} */
+            condition: "NEW" | "USED";
+            /** Format: date */
+            observedAt: string;
+            store?: string;
+            url?: string;
+        };
+        PriceSnapshotResponse: {
+            /** Format: uuid */
+            id?: string;
+            setNumber?: string;
+            amount?: number;
+            currency?: string;
+            /** @enum {string} */
+            condition?: "NEW" | "USED";
+            /** @enum {string} */
+            source?: "MANUAL";
+            /** Format: date */
+            observedAt?: string;
+            store?: string;
+            url?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        AddPriceAlertRuleRequest: {
+            setNumber?: string;
+            currency?: string;
+            /** @enum {string} */
+            type: "BELOW_TARGET_PRICE" | "PERCENT_BELOW_AVERAGE" | "AT_OR_BELOW_LOWEST";
+            thresholdValue?: number;
+        };
+        PriceAlertRuleResponse: {
+            /** Format: uuid */
+            id?: string;
+            setNumber?: string;
+            currency?: string;
+            /** @enum {string} */
+            type?: "BELOW_TARGET_PRICE" | "PERCENT_BELOW_AVERAGE" | "AT_OR_BELOW_LOWEST";
+            thresholdValue?: number;
+            active?: boolean;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        AddUserSetRequest: {
+            setNumber?: string;
+            /** @enum {string} */
+            status?: "OWNED" | "WISHLIST" | "BUILT" | "IN_PROGRESS";
+            purchasePrice?: number;
+            /** Format: date */
+            purchaseDate?: string;
+        };
+        UserSetResponse: {
+            /** Format: uuid */
+            id?: string;
+            setNumber?: string;
+            setName?: string;
+            /** Format: int32 */
+            yearReleased?: number;
+            themeName?: string;
+            imageUrl?: string;
+            /** @enum {string} */
+            status?: "OWNED" | "WISHLIST" | "BUILT" | "IN_PROGRESS";
+            purchasePrice?: number;
+            /** Format: date */
+            purchaseDate?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        AddUserPartRequest: {
+            externalPartNumber?: string;
+            /** Format: int32 */
+            colorExternalId: number;
+            /** Format: int32 */
+            quantity: number;
+            storageLocation?: string;
+        };
+        UserPartResponse: {
+            /** Format: uuid */
+            id?: string;
+            partNumber?: string;
+            partName?: string;
+            partImageUrl?: string;
+            /** Format: int32 */
+            colorExternalId?: number;
+            colorName?: string;
+            colorRgb?: string;
+            /** Format: int32 */
+            quantity?: number;
+            storageLocation?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
         InventoryImportResult: {
             setNumber?: string;
             /** Format: int32 */
@@ -179,6 +547,41 @@ export interface components {
             source?: string;
             cacheStatus?: string;
         };
+        RegisterRequest: {
+            email?: string;
+            password?: string;
+            displayName?: string;
+        };
+        AuthResponse: {
+            token?: string;
+            tokenType?: string;
+            user?: components["schemas"]["UserResponse"];
+        };
+        UserResponse: {
+            /** Format: uuid */
+            id?: string;
+            email?: string;
+            displayName?: string;
+            role?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        LoginRequest: {
+            email?: string;
+            password?: string;
+        };
+        UpdateUserSetRequest: {
+            /** @enum {string} */
+            status?: "OWNED" | "WISHLIST" | "BUILT" | "IN_PROGRESS";
+            purchasePrice?: number;
+            /** Format: date */
+            purchaseDate?: string;
+        };
+        UpdateUserPartRequest: {
+            /** Format: int32 */
+            quantity?: number;
+            storageLocation?: string;
+        };
         Pageable: {
             /** Format: int32 */
             page?: number;
@@ -198,6 +601,28 @@ export interface components {
             totalPages?: number;
             first?: boolean;
             last?: boolean;
+        };
+        CandidateEvaluation: {
+            amount?: number;
+            pricePerPiece?: number;
+            percentBelowAverage?: number;
+            atOrBelowLowest?: boolean;
+            /** @enum {string} */
+            verdict?: "GREAT_DEAL" | "GOOD_DEAL" | "FAIR" | "POOR";
+        };
+        PriceAnalysisResponse: {
+            setNumber?: string;
+            currency?: string;
+            /** Format: int32 */
+            snapshotCount?: number;
+            minAmount?: number;
+            averageAmount?: number;
+            maxAmount?: number;
+            latestAmount?: number;
+            /** Format: int32 */
+            numberOfParts?: number;
+            pricePerPiece?: number;
+            candidate?: components["schemas"]["CandidateEvaluation"];
         };
         PageResponseSetPartResponse: {
             content?: components["schemas"]["SetPartResponse"][];
@@ -228,12 +653,195 @@ export interface components {
             spare?: boolean;
             elementId?: string;
         };
+        MissingPartLine: {
+            partNumber?: string;
+            partName?: string;
+            partImageUrl?: string;
+            /** Format: int32 */
+            colorExternalId?: number;
+            colorName?: string;
+            colorRgb?: string;
+            /** Format: int32 */
+            required?: number;
+            /** Format: int32 */
+            owned?: number;
+            /** Format: int32 */
+            missing?: number;
+        };
+        MissingPartsReport: {
+            setNumber?: string;
+            /** Format: int32 */
+            totalRequired?: number;
+            /** Format: int32 */
+            totalOwned?: number;
+            /** Format: int32 */
+            totalMissing?: number;
+            /** Format: double */
+            completionPercentage?: number;
+            /** Format: int32 */
+            missingLineCount?: number;
+            lines?: components["schemas"]["MissingPartLine"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalLines?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        SetComparisonLine: {
+            partNumber?: string;
+            partName?: string;
+            partImageUrl?: string;
+            /** Format: int32 */
+            colorExternalId?: number;
+            colorName?: string;
+            colorRgb?: string;
+            /** Format: int32 */
+            quantityA?: number;
+            /** Format: int32 */
+            quantityB?: number;
+            /** Format: int32 */
+            shared?: number;
+            /** @enum {string} */
+            category?: "ONLY_A" | "ONLY_B" | "BOTH";
+        };
+        SetComparisonReport: {
+            setNumberA?: string;
+            setNumberB?: string;
+            /** Format: double */
+            similarityScore?: number;
+            /** Format: int32 */
+            sharedLineCount?: number;
+            /** Format: int32 */
+            onlyALineCount?: number;
+            /** Format: int32 */
+            onlyBLineCount?: number;
+            lines?: components["schemas"]["SetComparisonLine"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalLines?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        BuildableSetRecommendation: {
+            setNumber?: string;
+            name?: string;
+            themeName?: string;
+            /** Format: int32 */
+            totalRequired?: number;
+            /** Format: int32 */
+            totalOwned?: number;
+            /** Format: int32 */
+            totalMissing?: number;
+            /** Format: double */
+            completionPercentage?: number;
+            buildable?: boolean;
+        };
+        PageResponseBuildableSetRecommendation: {
+            content?: components["schemas"]["BuildableSetRecommendation"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        PageResponsePriceSnapshotResponse: {
+            content?: components["schemas"]["PriceSnapshotResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        PageResponsePriceAlertRuleResponse: {
+            content?: components["schemas"]["PriceAlertRuleResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        PageResponseTriggeredAlertResponse: {
+            content?: components["schemas"]["TriggeredAlertResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        TriggeredAlertResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            ruleId?: string;
+            setNumber?: string;
+            amount?: number;
+            currency?: string;
+            message?: string;
+            /** Format: date-time */
+            triggeredAt?: string;
+        };
         HealthResponse: {
             status?: string;
             service?: string;
             version?: string;
             /** Format: date-time */
             timestamp?: string;
+        };
+        PageResponseUserSetResponse: {
+            content?: components["schemas"]["UserSetResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+        };
+        PageResponseUserPartResponse: {
+            content?: components["schemas"]["UserPartResponse"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            first?: boolean;
+            last?: boolean;
         };
         RebrickableSetResponse: {
             set_num?: string;
@@ -265,6 +873,191 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list: {
+        parameters: {
+            query: {
+                setNumber?: string;
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponsePriceSnapshotResponse"];
+                };
+            };
+        };
+    };
+    add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddPriceSnapshotRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PriceSnapshotResponse"];
+                };
+            };
+        };
+    };
+    listRules: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponsePriceAlertRuleResponse"];
+                };
+            };
+        };
+    };
+    createRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddPriceAlertRuleRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PriceAlertRuleResponse"];
+                };
+            };
+        };
+    };
+    list_1: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseUserSetResponse"];
+                };
+            };
+        };
+    };
+    addSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddUserSetRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserSetResponse"];
+                };
+            };
+        };
+    };
+    list_2: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseUserPartResponse"];
+                };
+            };
+        };
+    };
+    addPart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddUserPartRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserPartResponse"];
+                };
+            };
+        };
+    };
     importInventory: {
         parameters: {
             query?: never;
@@ -311,6 +1104,146 @@ export interface operations {
             };
         };
     };
+    register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthResponse"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuthResponse"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserSetRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserSetResponse"];
+                };
+            };
+        };
+    };
+    remove_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserPartRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserPartResponse"];
+                };
+            };
+        };
+    };
     findAll: {
         parameters: {
             query: {
@@ -329,6 +1262,31 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["PageResponseBrickSetResponse"];
+                };
+            };
+        };
+    };
+    analyze: {
+        parameters: {
+            query: {
+                currency: string;
+                candidatePrice?: number;
+            };
+            header?: never;
+            path: {
+                setNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PriceAnalysisResponse"];
                 };
             };
         };
@@ -357,6 +1315,32 @@ export interface operations {
             };
         };
     };
+    getMissingParts: {
+        parameters: {
+            query?: {
+                missingOnly?: boolean;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                setNumber: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MissingPartsReport"];
+                };
+            };
+        };
+    };
     search: {
         parameters: {
             query: {
@@ -381,6 +1365,32 @@ export interface operations {
             };
         };
     };
+    compare: {
+        parameters: {
+            query: {
+                a: string;
+                b: string;
+                category?: "ONLY_A" | "ONLY_B" | "BOTH";
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SetComparisonReport"];
+                };
+            };
+        };
+    };
     findBySetNumber: {
         parameters: {
             query?: never;
@@ -399,6 +1409,51 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["BrickSetResponse"];
+                };
+            };
+        };
+    };
+    buildable: {
+        parameters: {
+            query: {
+                buildableOnly?: boolean;
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseBuildableSetRecommendation"];
+                };
+            };
+        };
+    };
+    listTriggered: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseTriggeredAlertResponse"];
                 };
             };
         };
@@ -445,6 +1500,26 @@ export interface operations {
             };
         };
     };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
     getById: {
         parameters: {
             query?: never;
@@ -464,6 +1539,66 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["ThemeResponse"];
                 };
+            };
+        };
+    };
+    remove_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deleteRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    dismissTriggered: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
