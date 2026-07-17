@@ -32,11 +32,23 @@ updates:
           - "org.springframework.boot:*"
           - "org.springframework:*"
           - "org.springframework.security:*"
+      # jjwt ships three artifacts (api, impl, jackson) that MUST share a version;
+      # a split version fails at runtime. Group them so they always arrive as a
+      # single PR - individual bumps (e.g. leaving jjwt-impl behind) are unsafe.
+      jjwt:
+        patterns:
+          - "io.jsonwebtoken:*"
       test-dependencies:
         patterns:
           - "org.junit*"
           - "org.mockito:*"
           - "org.assertj:*"
+    ignore:
+      # springdoc 3.x targets Spring Boot 4 (its parent is spring-boot-starter-parent
+      # 4.x). This project is on Boot 3.5; the correct line is 2.8.x. Suppress major
+      # bumps until the Boot 4 upgrade is taken deliberately, then remove this.
+      - dependency-name: "org.springdoc:*"
+        update-types: ["version-update:semver-major"]
 
   # Frontend — Next.js app. Out of scope for the backend audit; listed here so the
   # unassessed half of the repo at least gets automated advisories.
