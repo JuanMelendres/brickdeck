@@ -1,9 +1,9 @@
 # Technical Spike: Spring Boot 3.5 → 4.x Upgrade
 
-> Status: **Proposed** · Author: engineering · Date: 2026-07-17
-> **POC executed 2026-07-17 — see §12.** The Jackson/JWT unknown is now resolved: the
-> central risk is confirmed with exact versions, and the defer recommendation is
-> strengthened.
+> Status: **Accepted (Deferred)** · Author: engineering · Date: 2026-07-17
+> Decision recorded in [ADR-012](../../decisions/ADR-012-spring-boot-4-upgrade-deferred.md).
+> **POC executed 2026-07-17 — see §12.** The Jackson/JWT unknown is resolved: the central
+> risk is confirmed with exact versions, and the defer recommendation is confirmed.
 > Prompted by Dependabot #55 (`spring-boot-starter-parent` 3.5.16 → 4.1.0) and the
 > backend vulnerability audit (`docs/security/spring-vulnerability-audit-api.md`),
 > which deferred the Boot 4 decision as strategic rather than automatic.
@@ -320,13 +320,15 @@ migration approach when scheduled.
 
 ## 16. Decision
 
-- Decision: **Deferred** (recommended)
+- Decision: **Deferred**
 - Date: 2026-07-17
 - Owner: backend
-- Status: **Proposed** — pending team confirmation
+- Status: **Accepted** — confirmed 2026-07-17, recorded in
+  [ADR-012](../../decisions/ADR-012-spring-boot-4-upgrade-deferred.md).
 
 Keep Dependabot #55 open and un-ignored as the standing reminder. Keep the
-springdoc-major ignore in `dependabot.yml` until this decision flips.
+springdoc-major ignore in `dependabot.yml` until this decision flips. Revisit
+immediately if a Boot-4-only security fix lands on our dependency graph.
 
 ## 17. Next Steps
 

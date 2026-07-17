@@ -28,6 +28,7 @@ Docs-as-code for BrickDeck. Start here.
 - [ADR-009 Hexagonal + DDD packages](./decisions/ADR-009-hexagonal-ddd-packages.md)
 - [ADR-010 Git-flow / develop default](./decisions/ADR-010-git-flow-develop-default.md)
 - [ADR-011 Price data sourcing](./decisions/ADR-011-price-data-sourcing.md)
+- [ADR-012 Spring Boot 4 upgrade deferred](./decisions/ADR-012-spring-boot-4-upgrade-deferred.md)
 
 ## API
 - [API docs & conventions](./api/README.md)
