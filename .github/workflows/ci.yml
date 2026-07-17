@@ -53,6 +53,9 @@ jobs:
           # Tests mock external HTTP; the Rebrickable client bean only needs a
           # non-blank key to instantiate. Dummy value, not a real secret.
           REBRICKABLE_API_KEY: ci-dummy-key
+          # The app no longer ships a JWT signing default, so tests must supply one.
+          # Must be >= 32 chars. Dummy value, not a real secret.
+          JWT_SECRET: ci-dummy-jwt-secret-not-a-real-secret-32plus
 
   frontend:
     name: Frontend (apps/web)

@@ -28,6 +28,16 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!--
+			Security overrides on top of the Spring Boot 3.5.16 BOM.
+			Both raise a BOM-managed version to its first fixed release; drop each
+			one as soon as a Spring Boot 3.5.x upgrade manages that version or later.
+			See docs/security/spring-vulnerability-audit-api.md.
+		-->
+		<!-- CVE-2026-54515: BOM manages 2.21.4; fixed in 2.21.5. -->
+		<jackson-bom.version>2.21.5</jackson-bom.version>
+		<!-- CVE-2025-48924: BOM manages 3.17.0; fixed in 3.18.0. -->
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 	</properties>
 	<dependencies>
 		<dependency>
