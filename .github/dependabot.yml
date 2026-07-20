@@ -44,6 +44,12 @@ updates:
           - "org.mockito:*"
           - "org.assertj:*"
     ignore:
+      # Spring Boot 4 upgrade is deliberately deferred — see ADR-012
+      # (docs/decisions/ADR-012-spring-boot-4-upgrade-deferred.md). Dependabot kept
+      # raising the 3.5.16 -> 4.1.0 parent bump (PR #55, CI red); suppress the major
+      # so it stops reopening. Remove when the Boot 4 upgrade is taken deliberately.
+      - dependency-name: "org.springframework.boot:spring-boot-starter-parent"
+        update-types: ["version-update:semver-major"]
       # springdoc 3.x targets Spring Boot 4 (its parent is spring-boot-starter-parent
       # 4.x). This project is on Boot 3.5; the correct line is 2.8.x. Suppress major
       # bumps until the Boot 4 upgrade is taken deliberately, then remove this.
