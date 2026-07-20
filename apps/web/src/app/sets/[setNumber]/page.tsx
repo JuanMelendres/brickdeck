@@ -18,6 +18,10 @@ import { PartsInventory } from "@/features/sets/PartsInventory";
 import { useSetDetail } from "@/features/sets/useSetDetail";
 import { useSetParts } from "@/features/sets/useSetParts";
 import { useImportInventory } from "@/features/sets/useImportInventory";
+import { MissingPartsPanel } from "@/features/missingpieces/MissingPartsPanel";
+import { useMissingParts } from "@/features/missingpieces/useMissingParts";
+import { PriceTrackingSection } from "@/features/pricing/PriceTrackingSection";
+import { useAuth } from "@/features/auth/useAuth";
 
 const PARTS_PAGE_SIZE = 50;
 
@@ -31,10 +35,24 @@ export default function SetDetailPage() {
   const setNumber = params.setNumber;
 
   const [partsPage, setPartsPage] = useState(0);
+  const [missingOnly, setMissingOnly] = useState(false);
+  const [missingPage, setMissingPage] = useState(0);
+
+  const { status } = useAuth();
+  const isAuthenticated = status === "authenticated";
 
   const detail = useSetDetail(setNumber);
   const parts = useSetParts(setNumber, partsPage, PARTS_PAGE_SIZE);
   const importInventory = useImportInventory(setNumber);
+  const missingParts = useMissingParts(setNumber, isAuthenticated, {
+    missingOnly,
+    page: missingPage,
+  });
+
+  const handleMissingOnlyChange = (value: boolean) => {
+    setMissingOnly(value);
+    setMissingPage(0);
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -69,6 +87,32 @@ export default function SetDetailPage() {
             onImport={() => importInventory.mutate()}
             isImporting={importInventory.isPending}
             importError={importInventory.error}
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Missing pieces
+          </Typography>
+          <MissingPartsPanel
+            isAuthenticated={isAuthenticated}
+            isLoading={missingParts.isLoading}
+            isError={missingParts.isError}
+            error={missingParts.error}
+            report={missingParts.data}
+            missingOnly={missingOnly}
+            onMissingOnlyChange={handleMissingOnlyChange}
+            onPageChange={setMissingPage}
+          />
+        </Box>
+
+        <Box>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Price tracking
+          </Typography>
+          <PriceTrackingSection
+            setNumber={setNumber}
+            isAuthenticated={isAuthenticated}
           />
         </Box>
       </Stack>

@@ -1,0 +1,473 @@
+{
+  "info": {
+    "name": "BrickDeck API",
+    "description": "BrickDeck Catalog + Collection API. Set `baseUrl` and credentials via the environment. Run Auth > Login first to populate `{{token}}`; the Collection folders send it as a Bearer token automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "setNumber", "value": "75257-1" },
+    { "key": "setNumberB", "value": "10300-1" },
+    { "key": "partNumber", "value": "3001" },
+    { "key": "colorId", "value": "4" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Brick Fan\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.environment.set('token', res.token);",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "}",
+                  "pm.test('200 OK with token', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(res.token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalog",
+      "item": [
+        {
+          "name": "List sets (paginated)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets?page=0&size=20&sort=externalSetNumber,asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "externalSetNumber,asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search sets",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/search?q=falcon&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "search"],
+              "query": [
+                { "key": "q", "value": "falcon" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get set by number (find-or-import)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/v1/sets/by-number/{{setNumber}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "sets", "by-number", "{{setNumber}}"] }
+          }
+        },
+        {
+          "name": "Import set",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/catalog/sets/import", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalog", "sets", "import"] },
+            "body": { "mode": "raw", "raw": "{\n  \"setNumber\": \"{{setNumber}}\"\n}" }
+          }
+        },
+        {
+          "name": "Import set inventory",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/v1/catalog/sets/{{setNumber}}/inventory/import", "host": ["{{baseUrl}}"], "path": ["api", "v1", "catalog", "sets", "{{setNumber}}", "inventory", "import"] }
+          }
+        },
+        {
+          "name": "Get set parts (paginated)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/{{setNumber}}/parts?page=0&size=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "{{setNumber}}", "parts"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Missing parts report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/{{setNumber}}/missing-parts?missingOnly=false&page=0&size=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "{{setNumber}}", "missing-parts"],
+              "query": [
+                { "key": "missingOnly", "value": "false" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Compare two sets",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/compare?a={{setNumber}}&b={{setNumberB}}&page=0&size=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "compare"],
+              "query": [
+                { "key": "a", "value": "{{setNumber}}" },
+                { "key": "b", "value": "{{setNumberB}}" },
+                { "key": "category", "value": "BOTH", "disabled": true, "description": "Optional filter: ONLY_A | ONLY_B | BOTH" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" }
+              ]
+            },
+            "description": "Public endpoint. Quantity-weighted similarity + categorized per part+color diff. 404 if a set or its inventory is not imported."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommendations",
+      "item": [
+        {
+          "name": "Buildable wishlist sets",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations/buildable?buildableOnly=false&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations", "buildable"],
+              "query": [
+                { "key": "buildableOnly", "value": "false", "description": "true = only sets you can build right now" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Authenticated. Scores the user's WISHLIST sets by buildability from owned inventory, most-complete first."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pricing",
+      "item": [
+        {
+          "name": "Add price snapshot",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('priceSnapshotId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/price-snapshots", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-snapshots"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setNumber\": \"{{setNumber}}\",\n  \"amount\": 129.99,\n  \"currency\": \"USD\",\n  \"condition\": \"NEW\",\n  \"observedAt\": \"2026-01-10\",\n  \"store\": \"LEGO Store\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List price snapshots",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-snapshots?setNumber={{setNumber}}&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-snapshots"],
+              "query": [
+                { "key": "setNumber", "value": "{{setNumber}}" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete price snapshot",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/price-snapshots/{{priceSnapshotId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-snapshots", "{{priceSnapshotId}}"] }
+          }
+        },
+        {
+          "name": "Price analysis / deal verdict",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sets/{{setNumber}}/price-analysis?currency=USD&candidatePrice=119.99",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sets", "{{setNumber}}", "price-analysis"],
+              "query": [
+                { "key": "currency", "value": "USD" },
+                { "key": "candidatePrice", "value": "119.99", "description": "Optional: evaluate this price for a deal verdict" }
+              ]
+            },
+            "description": "Min/avg/max/latest + price-per-piece over your snapshots; candidatePrice adds a deal verdict."
+          }
+        },
+        {
+          "name": "Create alert rule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('priceAlertRuleId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/price-alerts", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-alerts"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setNumber\": \"{{setNumber}}\",\n  \"currency\": \"USD\",\n  \"type\": \"BELOW_TARGET_PRICE\",\n  \"thresholdValue\": 100.00\n}"
+            },
+            "description": "Set must be in your WISHLIST. thresholdValue required for target/percent; percent in (0,100]; ignored for AT_OR_BELOW_LOWEST."
+          }
+        },
+        {
+          "name": "List alert rules",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-alerts?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-alerts"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete alert rule",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/price-alerts/{{priceAlertRuleId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "price-alerts", "{{priceAlertRuleId}}"] }
+          }
+        },
+        {
+          "name": "List triggered alerts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/price-alerts/triggered?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "price-alerts", "triggered"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Alerts fired when a recorded price met a rule. Add a snapshot below your target to see one."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Collection - Sets",
+      "item": [
+        {
+          "name": "Add set to collection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('userSetId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "sets"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setNumber\": \"{{setNumber}}\",\n  \"status\": \"OWNED\",\n  \"purchasePrice\": 159.99,\n  \"purchaseDate\": \"2026-01-15\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List collection sets (paginated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collection/sets?page=0&size=20&sort=createdAt,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "collection", "sets"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "createdAt,desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update collection set",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/sets/{{userSetId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "sets", "{{userSetId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"BUILT\"\n}" }
+          }
+        },
+        {
+          "name": "Remove collection set",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/sets/{{userSetId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "sets", "{{userSetId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Collection - Parts",
+      "item": [
+        {
+          "name": "Add loose part",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.environment.set('userPartId', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/parts", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "parts"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalPartNumber\": \"{{partNumber}}\",\n  \"colorExternalId\": {{colorId}},\n  \"quantity\": 10,\n  \"storageLocation\": \"Bin A3\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List loose parts (paginated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collection/parts?page=0&size=20&sort=createdAt,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "collection", "parts"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "createdAt,desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update loose part",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/parts/{{userPartId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "parts", "{{userPartId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 12,\n  \"storageLocation\": \"Bin B1\"\n}" }
+          }
+        },
+        {
+          "name": "Remove loose part",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/v1/collection/parts/{{userPartId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "collection", "parts", "{{userPartId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

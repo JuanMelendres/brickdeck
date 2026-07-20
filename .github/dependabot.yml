@@ -1,0 +1,100 @@
+# Dependency update automation.
+#
+# Context: docs/security/spring-vulnerability-audit-api.md — the 2026-07-16 audit
+# found the repository had no ongoing dependency scanning at all, making every audit
+# a point-in-time snapshot. This is what turns it into continuous detection.
+#
+# Note the two ecosystems are deliberately separate: `apps/api` (Maven) and
+# `apps/web` (npm/pnpm) have different reviewers and different risk profiles.
+
+version: 2
+
+updates:
+  # Backend — Spring Boot API.
+  # Most versions here are managed by the Spring Boot BOM rather than declared
+  # directly, so Dependabot will mainly surface the parent, the plugins, and the
+  # handful of directly-pinned libraries (jjwt, springdoc).
+  - package-ecosystem: maven
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Spring Boot's modules move together; one PR per weekly patch train.
+      spring-boot:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework:*"
+          - "org.springframework.security:*"
+      # jjwt ships three artifacts (api, impl, jackson) that MUST share a version;
+      # a split version fails at runtime. Group them so they always arrive as a
+      # single PR - individual bumps (e.g. leaving jjwt-impl behind) are unsafe.
+      jjwt:
+        patterns:
+          - "io.jsonwebtoken:*"
+      test-dependencies:
+        patterns:
+          - "org.junit*"
+          - "org.mockito:*"
+          - "org.assertj:*"
+    ignore:
+      # springdoc 3.x targets Spring Boot 4 (its parent is spring-boot-starter-parent
+      # 4.x). This project is on Boot 3.5; the correct line is 2.8.x. Suppress major
+      # bumps until the Boot 4 upgrade is taken deliberately, then remove this.
+      - dependency-name: "org.springdoc:*"
+        update-types: ["version-update:semver-major"]
+
+  # Frontend — Next.js app. Out of scope for the backend audit; listed here so the
+  # unassessed half of the repo at least gets automated advisories.
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      mui:
+        patterns:
+          - "@mui/*"
+          - "@emotion/*"
+    ignore:
+      # Both blocked by eslint-config-next's lint stack, not our code:
+      #  - eslint 10: eslint-plugin-react (latest 7.37.5) peers eslint <=^9.7
+      #  - typescript 7: typescript-eslint@8 peers typescript <6.1.0 (crashes on TS 7)
+      # Our code is already clean under both (typecheck passes on TS 7); the block is
+      # upstream and lifts with a future Next release. Suppress the majors until then so
+      # they stop reopening on each 10.x / 7.x patch. Remove when Next ships an
+      # eslint-config-next with ESLint 10 / TS 7 support. Patch/minor still flow.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+
+  # CI actions — pinned by major tag today (actions/checkout@v4 etc.), so this
+  # mostly catches majors and any action that gets deprecated.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "chore(ci)"

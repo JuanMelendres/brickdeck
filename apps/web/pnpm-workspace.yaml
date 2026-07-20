@@ -1,0 +1,21 @@
+# Native packages allowed to run install build scripts (pnpm blocks these by
+# default). sharp backs Next image optimization; unrs-resolver backs the
+# eslint (oxc) module resolver.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+
+# CVE-2026-41305 / GHSA-qx2v-qp2m-jg93: postcss does not escape `</style>` when
+# stringifying, which is an XSS vector wherever user-submitted CSS is parsed and
+# re-embedded in a <style> tag. Fixed in 8.5.10, but next@16.2.10 (the latest
+# stable) still pins 8.4.31 exactly; only next 16.3.0-preview.* has picked up the
+# fix, so there is no stable release to upgrade to.
+#
+# Not reachable here - this app has no .css files at all (MUI/Emotion CSS-in-JS)
+# and never feeds user CSS to postcss - but the override is free and keeps the
+# audit clean. Drop it once a stable Next ships postcss >= 8.5.10.
+#
+# Overrides live here rather than in package.json: pnpm 11 no longer reads the
+# `pnpm` field from package.json and ignores it silently.
+overrides:
+  postcss: ^8.5.10

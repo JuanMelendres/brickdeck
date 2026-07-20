@@ -1,12 +1,21 @@
 import { API_BASE_URL } from "@/lib/env";
+import { clearToken, getToken } from "@/lib/auth/tokenStore";
+
+export type ValidationErrors = Record<string, string>;
 
 export class ApiError extends Error {
   readonly status: number;
+  readonly validationErrors?: ValidationErrors;
 
-  constructor(status: number, message: string) {
+  constructor(
+    status: number,
+    message: string,
+    validationErrors?: ValidationErrors,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.validationErrors = validationErrors;
   }
 }
 
@@ -27,29 +36,56 @@ function buildUrl(path: string, params?: QueryParams): string {
   return url.toString();
 }
 
-async function extractMessage(response: Response): Promise<string> {
+async function extractError(
+  response: Response,
+): Promise<{ message: string; validationErrors?: ValidationErrors }> {
   try {
-    const body = (await response.json()) as { message?: string };
+    const body = (await response.json()) as {
+      message?: string;
+      validationErrors?: ValidationErrors;
+    };
     if (body && typeof body.message === "string") {
-      return body.message;
+      return { message: body.message, validationErrors: body.validationErrors };
     }
   } catch {
     // non-JSON error body
   }
-  return `Request failed with status ${response.status}`;
+  return { message: `Request failed with status ${response.status}` };
 }
 
-async function request<T>(url: string, init: RequestInit): Promise<T> {
+async function rawRequest(url: string, init: RequestInit): Promise<Response> {
+  const token = getToken();
+  const authHeader: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : {};
+
   const response = await fetch(url, {
     ...init,
-    headers: { Accept: "application/json", ...init.headers },
+    headers: { Accept: "application/json", ...authHeader, ...init.headers },
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, await extractMessage(response));
+    if (response.status === 401) {
+      clearToken();
+    }
+    const { message, validationErrors } = await extractError(response);
+    throw new ApiError(response.status, message, validationErrors);
   }
 
+  return response;
+}
+
+async function request<T>(url: string, init: RequestInit): Promise<T> {
+  const response = await rawRequest(url, init);
   return (await response.json()) as T;
+}
+
+function jsonBodyInit(method: string, body?: unknown): RequestInit {
+  return {
+    method,
+    headers: body === undefined ? {} : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
 }
 
 export function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
@@ -57,10 +93,14 @@ export function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
 }
 
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  return request<T>(buildUrl(path), {
-    method: "POST",
-    headers:
-      body === undefined ? {} : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  return request<T>(buildUrl(path), jsonBodyInit("POST", body));
+}
+
+export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(buildUrl(path), jsonBodyInit("PATCH", body));
+}
+
+/** DELETE returning no body (204 No Content). */
+export async function apiDelete(path: string): Promise<void> {
+  await rawRequest(buildUrl(path), { method: "DELETE" });
 }
