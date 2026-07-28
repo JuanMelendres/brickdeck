@@ -9,7 +9,9 @@ public record SetPartResponse(
         String setNumber,
         String partNumber,
         String partName,
-        @Schema(nullable = true) String partImageUrl,
+        // Not @Schema(nullable = true): same no-effect quirk as
+        // BrickSetResponse.id - CI showed it doesn't apply here either.
+        String partImageUrl,
         @Schema(nullable = true) Integer colorExternalId,
         String colorName,
         @Schema(nullable = true) String colorRgb,

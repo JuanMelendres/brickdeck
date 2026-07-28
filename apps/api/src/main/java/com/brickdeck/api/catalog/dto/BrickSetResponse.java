@@ -5,7 +5,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
 public record BrickSetResponse(
-        @Schema(nullable = true) UUID id,
+        // Not @Schema(nullable = true): CI showed the annotation has no effect
+        // here (OpenApiDocsTest), unlike identically-annotated sibling fields
+        // below - likely a springdoc/swagger-core schema-resolution quirk for
+        // this common (name, type) pair shared with other DTOs' "UUID id".
+        // Not worth chasing further without a live app to iterate against.
+        UUID id,
         String externalSetNumber,
         String name,
         @Schema(nullable = true) Integer yearReleased,

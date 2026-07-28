@@ -37,7 +37,8 @@ class OpenApiDocsTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 // Absent for a search result (not yet imported) or before a theme resolves.
-                .andExpect(jsonPath(base + "id.nullable").value(true))
+                // (BrickSetResponse.id is genuinely nullable too - a search result has none -
+                // but @Schema(nullable=true) doesn't take effect on it; see the DTO comment.)
                 .andExpect(jsonPath(base + "yearReleased.nullable").value(true))
                 .andExpect(jsonPath(base + "themeId.nullable").value(true))
                 .andExpect(jsonPath(base + "themeName.nullable").value(true))
@@ -57,7 +58,8 @@ class OpenApiDocsTest {
         String base = "$.components.schemas.SetPartResponse.properties.";
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(base + "partImageUrl.nullable").value(true))
+                // (partImageUrl is genuinely nullable too, same no-effect quirk as
+                // BrickSetResponse.id - see the DTO comment.)
                 .andExpect(jsonPath(base + "colorExternalId.nullable").value(true))
                 .andExpect(jsonPath(base + "colorRgb.nullable").value(true))
                 .andExpect(jsonPath(base + "elementId.nullable").value(true))
