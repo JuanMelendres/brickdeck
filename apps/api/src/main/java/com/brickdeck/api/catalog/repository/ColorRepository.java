@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface ColorRepository extends JpaRepository<Color, UUID> {
 
     Optional<Color> findByExternalId(Integer externalId);
+
+    Optional<Color> findByName(String name);
 }

@@ -107,6 +107,10 @@ vi.mock("@/features/collection/collectionPartsHooks", () => ({
   }),
 }));
 
+vi.mock("@/features/classification/useClassifyPart", () => ({
+  useClassifyPart: () => ({ mutateAsync: vi.fn() }),
+}));
+
 describe("CollectionPage", () => {
   it("renders the heading, owned sets, and loose parts sections", () => {
     useCollectionSetsMock.mockReturnValue(setsPage());
@@ -125,6 +129,19 @@ describe("CollectionPage", () => {
     expect(screen.getByLabelText(/part number/i)).toBeInTheDocument();
     expect(screen.getByText("Millennium Falcon")).toBeInTheDocument();
     expect(screen.getByText("Brick 2 x 4")).toBeInTheDocument();
+  });
+
+  it("opens the photo-classify dialog when Scan a part is clicked", async () => {
+    const user = userEvent.setup();
+    useCollectionSetsMock.mockReturnValue(setsPage());
+    useCollectionPartsMock.mockReturnValue(partsPage());
+    render(<CollectionPage />);
+
+    await user.click(screen.getByRole("button", { name: /scan a part/i }));
+
+    expect(
+      screen.getByRole("heading", { name: /scan a part/i }),
+    ).toBeInTheDocument();
   });
 
   it("advances the owned-sets page when Next is clicked", async () => {

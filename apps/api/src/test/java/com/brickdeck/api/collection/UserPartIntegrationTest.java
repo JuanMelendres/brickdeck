@@ -4,6 +4,7 @@ import com.brickdeck.api.catalog.entity.Color;
 import com.brickdeck.api.catalog.entity.Part;
 import com.brickdeck.api.catalog.repository.ColorRepository;
 import com.brickdeck.api.catalog.repository.PartRepository;
+import com.brickdeck.api.external.rebrickable.client.RebrickableClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,10 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -38,6 +44,9 @@ class UserPartIntegrationTest {
 
     @Autowired
     private ColorRepository colorRepository;
+
+    @MockitoBean
+    private RebrickableClient rebrickableClient;
 
     private static final String PARTS = "/api/v1/collection/parts";
     // Synthetic catalog refs, unlikely to collide with real imported data in the shared DB.
@@ -90,6 +99,13 @@ class UserPartIntegrationTest {
 
     @Test
     void addPartRejectsUnknownPartWith404() throws Exception {
+        // "DOES-NOT-EXIST" isn't cached locally, so slice 0's find-or-import
+        // falls through to Rebrickable - mock that boundary instead of hitting
+        // the real API (CI's Rebrickable key is a dummy value).
+        when(rebrickableClient.getPart("DOES-NOT-EXIST")).thenThrow(
+                HttpClientErrorException.NotFound.create(
+                        HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, null, null));
+
         mockMvc.perform(post(PARTS)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)

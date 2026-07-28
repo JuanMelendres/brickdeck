@@ -96,6 +96,18 @@ export function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(buildUrl(path), jsonBodyInit("POST", body));
 }
 
+/**
+ * POST a `FormData` body (multipart/form-data). No `Content-Type` header is
+ * set here - the browser derives it (including the multipart boundary) from
+ * the `FormData` body itself.
+ */
+export function apiPostMultipart<T>(
+  path: string,
+  formData: FormData,
+): Promise<T> {
+  return request<T>(buildUrl(path), { method: "POST", body: formData });
+}
+
 export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(buildUrl(path), jsonBodyInit("PATCH", body));
 }

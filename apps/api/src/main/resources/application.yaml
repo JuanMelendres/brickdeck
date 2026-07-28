@@ -43,6 +43,14 @@ rebrickable:
   base-url: ${REBRICKABLE_BASE_URL:https://rebrickable.com/api/v3}
   api-key: ${REBRICKABLE_API_KEY:}
 
+brickognize:
+  base-url: ${BRICKOGNIZE_BASE_URL:https://api.brickognize.com}
+
+gemini:
+  base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+  api-key: ${GEMINI_API_KEY:}
+  model: ${GEMINI_MODEL:gemini-flash-latest}
+
 brickdeck:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

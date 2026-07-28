@@ -18,6 +18,7 @@ tags:
   - name: Collection
   - name: Recommendations
   - name: Pricing
+  - name: Classification
 paths:
   /api/v1/health:
     get:
@@ -479,6 +480,31 @@ paths:
       responses:
         "204": { description: Deleted }
         "404": { description: Not found or not owned }
+  /api/v1/classify/part:
+    post:
+      tags: [Classification]
+      summary: >
+        Classify a single-part photo into ranked part/color candidates (ADR-013).
+        Hybrid source: Brickognize for part-number candidates, Gemini for color.
+        Classify-and-discard — the uploaded photo is never persisted.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image: { type: string, format: binary }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PartClassificationResponse" }
+        "400": { description: Missing image part }
+        "401": { description: Unauthorized }
 
 components:
   securitySchemes:
@@ -863,3 +889,34 @@ components:
         totalPages: { type: integer }
         first: { type: boolean }
         last: { type: boolean }
+    PartResolutionStatus:
+      type: string
+      enum: [RESOLVED, UNRESOLVED]
+      description: >
+        RESOLVED = part number already exists in the local catalog. UNRESOLVED =
+        not yet cached locally; saving it via POST /api/v1/collection/parts will
+        attempt a Rebrickable find-or-import.
+    PartSuggestion:
+      type: object
+      properties:
+        partNumber: { type: string, example: "3001" }
+        partNameGuess: { type: string, nullable: true }
+        score: { type: number, format: double }
+        resolutionStatus: { $ref: "#/components/schemas/PartResolutionStatus" }
+        referenceImageUrl: { type: string, nullable: true }
+    ColorSuggestion:
+      type: object
+      properties:
+        colorId:
+          type: integer
+          nullable: true
+          description: Null if the guessed color name isn't in the local catalog.
+        colorName: { type: string, example: Red }
+        confidence: { type: number, format: double }
+    PartClassificationResponse:
+      type: object
+      properties:
+        colorSuggestion: { $ref: "#/components/schemas/ColorSuggestion" }
+        partSuggestions:
+          type: array
+          items: { $ref: "#/components/schemas/PartSuggestion" }

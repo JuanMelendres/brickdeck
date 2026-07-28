@@ -22,6 +22,8 @@
 - `Pricing` — add/list/delete price snapshots, price analysis + deal verdict, alert rules (create/list/delete), triggered alerts
 - `Collection - Sets` — add, list, update, delete
 - `Collection - Parts` — add, list, update, delete
+- `Classification` — classify a single-part photo (`POST /api/v1/classify/part`,
+  multipart `image` field) into ranked part/color candidates (ADR-013)
 
 The `category` query param on **Compare** is included but disabled by default;
 enable it to filter lines by `ONLY_A`, `ONLY_B`, or `BOTH`.
