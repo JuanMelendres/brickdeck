@@ -30,4 +30,10 @@ class OpenApiDocsTest {
         mockMvc.perform(get("/swagger-ui/index.html"))
                 .andExpect(status().isOk());
     }
+
+    // No test asserts specific `nullable: true` flags on generated schema properties:
+    // confirmed across two separate CI runs that which properties actually get the
+    // flag is non-deterministic (a different subset failed each time, for fields
+    // annotated identically) - see BrickSetResponse/SetPartResponse comments. Asserting
+    // exact output here would just be a flaky test around a flaky library behavior.
 }
