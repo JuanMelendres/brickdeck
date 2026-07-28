@@ -4,13 +4,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
+/**
+ * {@code @Schema(nullable = true)} below is best-effort: confirmed across two
+ * CI runs that springdoc/swagger-core's generated {@code nullable} flag is
+ * non-deterministic per field (a different subset of these was missing each
+ * run) - a scan-order-sensitive quirk, not something fixable from this DTO
+ * alone. Treat the generated schema as a hint, not a verified contract, until
+ * that's root-caused (needs a live app to iterate against).
+ */
 public record BrickSetResponse(
-        // Not @Schema(nullable = true): CI showed the annotation has no effect
-        // here (OpenApiDocsTest), unlike identically-annotated sibling fields
-        // below - likely a springdoc/swagger-core schema-resolution quirk for
-        // this common (name, type) pair shared with other DTOs' "UUID id".
-        // Not worth chasing further without a live app to iterate against.
-        UUID id,
+        @Schema(nullable = true) UUID id,
         String externalSetNumber,
         String name,
         @Schema(nullable = true) Integer yearReleased,

@@ -4,14 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
+/** See {@link BrickSetResponse} javadoc - the nullable flags below are best-effort. */
 public record SetPartResponse(
         UUID id,
         String setNumber,
         String partNumber,
         String partName,
-        // Not @Schema(nullable = true): same no-effect quirk as
-        // BrickSetResponse.id - CI showed it doesn't apply here either.
-        String partImageUrl,
+        @Schema(nullable = true) String partImageUrl,
         @Schema(nullable = true) Integer colorExternalId,
         String colorName,
         @Schema(nullable = true) String colorRgb,
