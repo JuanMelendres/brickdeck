@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Container,
   Stack,
@@ -17,6 +18,8 @@ import { AddPartToCollectionForm } from "@/features/collection/AddPartToCollecti
 import { CollectionPartsList } from "@/features/collection/CollectionPartsList";
 import { EditPartDialog } from "@/features/collection/EditPartDialog";
 import { PaginationControls } from "@/features/collection/PaginationControls";
+import { PhotoClassifyDialog } from "@/features/classification/PhotoClassifyDialog";
+import { useClassifyPart } from "@/features/classification/useClassifyPart";
 import {
   useAddCollectionSet,
   useCollectionSets,
@@ -105,6 +108,7 @@ function OwnedSetsSection() {
 function LoosePartsSection() {
   const [page, setPage] = useState(0);
   const [editingPart, setEditingPart] = useState<UserPartResponse | null>(null);
+  const [scanning, setScanning] = useState(false);
   const { data, isLoading, isError, error } = useCollectionParts(
     page,
     PAGE_SIZE,
@@ -112,6 +116,7 @@ function LoosePartsSection() {
   const addPart = useAddCollectionPart();
   const updatePart = useUpdateCollectionPart();
   const removePart = useRemoveCollectionPart();
+  const classifyPart = useClassifyPart();
 
   const handleAdd = async (values: AddUserPartRequest) => {
     await addPart.mutateAsync(values);
@@ -126,6 +131,13 @@ function LoosePartsSection() {
       <Typography variant="h5" component="h2">
         Loose parts
       </Typography>
+      <Button
+        variant="outlined"
+        sx={{ alignSelf: "flex-start" }}
+        onClick={() => setScanning(true)}
+      >
+        Scan a part
+      </Button>
       <AddPartToCollectionForm onSubmit={handleAdd} />
       {isLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -161,6 +173,13 @@ function LoosePartsSection() {
           part={editingPart}
           onSubmit={handleUpdate}
           onClose={() => setEditingPart(null)}
+        />
+      )}
+      {scanning && (
+        <PhotoClassifyDialog
+          onClassify={(image) => classifyPart.mutateAsync(image)}
+          onConfirm={handleAdd}
+          onClose={() => setScanning(false)}
         />
       )}
     </Stack>

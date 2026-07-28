@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, apiDelete, apiGet, apiPost } from "./client";
+import { ApiError, apiDelete, apiGet, apiPost, apiPostMultipart } from "./client";
 import { getToken, setToken } from "@/lib/auth/tokenStore";
 
 const jsonResponse = (body: unknown, status = 200): Response =>
@@ -96,6 +96,46 @@ describe("apiPost", () => {
     await expect(
       apiPost("/api/v1/catalog/sets/x/inventory/import"),
     ).rejects.toMatchObject({ status: 404, message: "Set not imported" });
+  });
+});
+
+describe("apiPostMultipart", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("POSTs a FormData body without setting a Content-Type header", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({ ok: true }));
+
+    const formData = new FormData();
+    formData.append("image", new Blob(["fake"]), "photo.jpg");
+
+    const result = await apiPostMultipart<{ ok: boolean }>(
+      "/api/v1/classify/part",
+      formData,
+    );
+
+    expect(result).toEqual({ ok: true });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://localhost:8080/api/v1/classify/part");
+    const requestInit = init as RequestInit;
+    expect(requestInit.method).toBe("POST");
+    expect(requestInit.body).toBe(formData);
+    expect(
+      (requestInit.headers as Record<string, string> | undefined)?.[
+        "Content-Type"
+      ],
+    ).toBeUndefined();
+  });
+
+  it("throws ApiError with backend message on non-2xx", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({ message: "Missing image part" }, 400),
+    );
+
+    await expect(
+      apiPostMultipart("/api/v1/classify/part", new FormData()),
+    ).rejects.toMatchObject({ status: 400, message: "Missing image part" });
   });
 });
 
