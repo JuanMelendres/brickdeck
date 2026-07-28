@@ -1,6 +1,6 @@
 # Technical Spike: Phase 7 AI-Assisted Part Classification
 
-Date: 2026-07-16 · Status: Proposed · Owner: Juan Melendres
+Date: 2026-07-16 · Status: Decided (2026-07-28, see §16 and ADR-013) · Owner: Juan Melendres
 
 ## 1. Summary
 
@@ -145,7 +145,35 @@ Time-box: **one day.** Throwaway branch, no production code, no migration, no en
 
 ## 12. Proof of Concept Results
 
-TODO: POC not executed yet.
+**Executed 2026-07-28.** Eval set: 18 real Rebrickable catalog part+color combinations (not physically photographed — see caveat below), spanning easy (6: common bricks/plates in solid colors) → medium (6: slopes, round parts, technic pin, tile) → hard (6: near-identical size variants 3020/3021/3623/3710, a translucent piece, a similar-red pair). Ground truth: exact `part_num` + `color_id` from Rebrickable. Full data: eval set CSV + both raw response sets kept in session scratchpad (not committed — throwaway per §11).
+
+**Deviation from §11 plan:** used Rebrickable's own per-color catalog renders (`part_img_url`) instead of physically photographing real bricks, and substituted **Google Gemini (`gemini-flash-latest`, free tier via AI Studio)** for Option A instead of Claude vision — a personal-project budget call (Anthropic requires prepaid credits with no free tier; Gemini's AI Studio free tier does not). This is a real methodology caveat, not just a substitution — flagged in Finding 8 below.
+
+### Prototype B — Brickognize (`POST /predict/parts/`, multipart `query_image`, no auth, no cost)
+
+- **Part hit rate (exact catalog id): 14/18 = 77.8%.** Base-number-normalized (ignoring mold-suffix letters like `3070` vs `3070b`): 17/18 = 94.4%. The one irreducible miss: `6141` (Plate Round 1x1 w/ solid stud) returned as `4073` — a different BrickLink-style id for a related mold, not a suffix variant.
+- **Color hit rate: 0/18 = 0%.** The response schema has no color field at all (confirmed via OpenAPI spec — color only appears in a separate, unused `/feedback/color/` schema). This is structural, not a bad guess.
+- Latency: sub-second per call in manual testing (not rigorously measured).
+
+### Prototype A (Gemini substitute) — `gemini-flash-latest`, structured JSON output, color constrained to a 275-name enum from the local `colors` table
+
+- **Part hit rate (exact): 13/18 = 72.2%.** Base-normalized: 14/18 = 77.8%. Misses: `3070b`→`3068b` (wrong part, a 2x2 tile guessed for a 1x1 tile), `3665`→`92946` (wrong slope variant), `6141`→`4073` (same miss as Brickognize), `32054`→`87082` (wrong technic pin). Brickognize beat Gemini on pure shape id, as the spike's own trade-off table predicted (Option B "likely better at pure shape ID on the long tail").
+- **Color hit rate: 13/18 = 72.2%** — below the 80% gate. **5 misses, 4 of which are the same failure mode:** guessing a `Trans-`variant when ground truth was the opaque color (`Red`→`Trans-Red` ×4, on items 1/13/14/16 — all solid-red pieces). The 5th miss (`32054` technic pin: `Black`→`Dark Bluish Gray`) is a plausible, unrelated confusion.
+- Rate limit note: free tier caps at 5 requests/minute on this model; 2 of 18 calls hit `429` and were retried after the window reset. A production quota/backoff strategy would need this.
+
+### Finding 8: The image source, not just the model, drove the biggest color failure mode
+
+Description: 4 of 5 Gemini color misses are the identical `Trans-X` confusion, all on Rebrickable's rendered catalog photography (glossy, raytraced-looking renders), not on real bricks under real lighting.
+Impact: This is very likely an artifact of substituting stock renders for real photos (§11's original ask), not a fundamental Gemini weakness — but it was not verified against real photos, so it stays a hypothesis, not a finding. **A re-run against a handful of real phone photos is cheap and would materially change confidence in the 72.2% number** (it could go up if the render-glossiness theory holds, or confirm a genuine model weakness if it doesn't).
+
+### Gate result
+
+| Metric | Gate | Brickognize | Gemini | Hybrid (part=Brickognize, color=Gemini) |
+|---|---|---|---|---|
+| Part top-5 hit rate | ≥ 60% | 77.8% (94.4% base-norm) | 72.2% (77.8% base-norm) | 77.8% (uses Brickognize) |
+| Color hit rate | ≥ 80% | 0% (not returned) | 72.2% | 72.2% (uses Gemini) |
+
+**Gate not formally met on color (72.2% < 80%) under either source alone or the hybrid.** Part gate clears comfortably either way. Brickognize cannot contribute color at all (structural), so a hybrid is mandatory if this pairing ships — this validates the spike's Option E (hybrid) over either single source, just with Gemini free-tier standing in for the Option-A vision role instead of Claude.
 
 ## 13. Trade-Off Analysis
 
@@ -192,7 +220,14 @@ Assumptions supporting this: the POC clears the §11 gate; the classification co
 
 ## 16. Decision
 
-Decision pending. (Recommendation proposed for review; confirm before running the POC.)
+**Decided 2026-07-28 — see ADR-013.** Ship slice 1 as a hybrid: **Brickognize** for
+part-number candidates (free, LEGO-specialist, won on shape accuracy in the POC)
+and **Google Gemini free tier** for color candidates (replaces Claude vision —
+budget call for a personal project with no Anthropic free tier). The color POC
+result (72.2%) came in under the §11 gate (80%); treated as advisory given the
+confirm-before-save safety net (see ADR-013 for the full risk-acceptance
+reasoning). Real-photo re-verification of the color result is deferred, not
+blocking.
 
 ## 17. Next Steps
 
@@ -205,9 +240,9 @@ Decision pending. (Recommendation proposed for review; confirm before running th
 
 ## 18. ADR Candidate
 
-- **ADR needed:** Yes.
-- **Suggested title:** ADR-012 — AI part classification: vendor vision API first, no Python AI service in Phase 7.
-- **Reason:** Introduces a new external integration and a recurring per-request cost, supersedes the AI half of ADR-006, and decides against (defers) the Python AI service in `ai-strategy.md`'s target architecture — an architecture + long-term-maintainability decision, which is exactly the ADR trigger.
+- **ADR needed:** Yes — written.
+- **Title:** [ADR-013 — AI part classification: hybrid vendor vision (Brickognize + Gemini), no Python AI service](../decisions/ADR-013-ai-part-classification-hybrid-vision.md).
+- **Reason:** Introduces two new external integrations, supersedes the AI half of ADR-006, and decides against the Python AI service in `ai-strategy.md`'s target architecture — an architecture + long-term-maintainability decision, which is exactly the ADR trigger.
 
 ## 19. Open Questions
 

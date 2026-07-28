@@ -86,15 +86,16 @@ Success criteria: user sees whether a current price is a good deal, and gets ale
 
 ## Phase 7 — AI-Assisted Classification
 
-Status: Spike proposed (decision pending)
+Status: Decided (2026-07-28) — slice 1 not yet implemented
 
 - Photo → part/color suggestion + confidence + user confirm
-- Spike — Done (proposed): `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md`. Recommends Claude vision (`claude-opus-4-8`) via `anthropic-java` behind a `PartClassifier` port for slice 1, with Brickognize (LEGO-specialist API) benchmarked head-to-head in a one-day POC. Rules out a custom CNN (dataset/GPU/MLOps) and generic cloud vision (no identifier grounding) as first slices. **No Python AI service needed** — the Java SDK does vision + structured outputs, so slice 1 is one more `external.*` adapter. Colors ground via a structured-output enum from the `colors` table; part numbers are validated claims (`resolutionStatus`), not resolved refs.
-- POC gate before any production code: top-5 part hit rate >= 60% and color hit rate >= 80% on a 15–20 real-brick eval set (the eval set outlives the POC and makes later source swaps measurable).
-- Slice 0 — Done: `RebrickableClient.getPart/getColor` + `PartService.findOrImport`/`ColorService.findOrImport` (cache-first, Rebrickable-backed on miss); `UserPartService` uses these instead of raw repo lookups, so loose-piece manual entry no longer requires the part/color to be pre-imported via a set. Prerequisite for slice 1 met.
-- Proposed slices: 1 — `classification` package + `external.anthropic` adapter, `POST /api/v1/classify/part`, transient photos, nullable `part_img_url` for reference images; 2 — frontend capture + confirm (client-side downscale) wired to `POST /api/v1/collection/parts`.
-- ADR-012 candidate: AI part classification — vendor vision API first, no Python AI service in Phase 7; supersedes the AI half of ADR-006.
-- Next: approve direction + POC gate, build the eval set, run the POC, record results in the spike's section 12, then ADR-012 and a TDD for slice 0.
+- Spike — Done: `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md`. Originally recommended Claude vision; superseded by the POC below.
+- Decision (ADR-013) — Done: POC run against 18 real part+color combos. **Brickognize** (free, LEGO-specialist) wins on part-shape id (77.8%/94.4% base-norm) but returns no color at all. **Google Gemini free tier** (swapped in for Claude vision — no-budget personal project) supplies color candidates (72.2% hit rate, below the 80% gate but accepted as advisory given mandatory confirm-before-save). Chosen slice-1 architecture: **hybrid Brickognize (part) + Gemini (color)**, both plain-REST `external.*` adapters behind a `PartClassifier` port, no Python service.
+- Slice 0 — Done: `RebrickableClient.getPart/getColor` + `PartService.findOrImport`/`ColorService.findOrImport` (cache-first, Rebrickable-backed on miss); `UserPartService` uses these instead of raw repo lookups, so loose-piece manual entry no longer requires the part/color to be pre-imported via a set.
+- Slice 1 (not started) — `classification` package + `external.brickognize` + `external.gemini` adapters behind `PartClassifier`; `POST /api/v1/classify/part` (authenticated, multipart) → ranked candidates w/ confidence + `resolutionStatus`; transient photos (no persistence); nullable `part_img_url` column (new Flyway migration) for reference images.
+- Slice 2 (not started) — frontend capture + confirm (client-side downscale) wired to `POST /api/v1/collection/parts`.
+- Known risk carried into slice 1: color accuracy (72.2% in POC) unverified against real photos — Rebrickable's stock renders may have biased the model toward `Trans-` guesses on solid colors. Cheap to re-check later; not blocking.
+- Next: TDD for slice 1 (classifier port + both adapters + endpoint + migration), then slice 2.
 
 ## Phase 8 — Productization
 
