@@ -86,16 +86,16 @@ Success criteria: user sees whether a current price is a good deal, and gets ale
 
 ## Phase 7 — AI-Assisted Classification
 
-Status: Decided (2026-07-28) — slice 1 not yet implemented
+Status: Slice 1 done (2026-07-28) — slice 2 (frontend) not started
 
 - Photo → part/color suggestion + confidence + user confirm
 - Spike — Done: `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md`. Originally recommended Claude vision; superseded by the POC below.
 - Decision (ADR-013) — Done: POC run against 18 real part+color combos. **Brickognize** (free, LEGO-specialist) wins on part-shape id (77.8%/94.4% base-norm) but returns no color at all. **Google Gemini free tier** (swapped in for Claude vision — no-budget personal project) supplies color candidates (72.2% hit rate, below the 80% gate but accepted as advisory given mandatory confirm-before-save). Chosen slice-1 architecture: **hybrid Brickognize (part) + Gemini (color)**, both plain-REST `external.*` adapters behind a `PartClassifier` port, no Python service.
 - Slice 0 — Done: `RebrickableClient.getPart/getColor` + `PartService.findOrImport`/`ColorService.findOrImport` (cache-first, Rebrickable-backed on miss); `UserPartService` uses these instead of raw repo lookups, so loose-piece manual entry no longer requires the part/color to be pre-imported via a set.
-- Slice 1 (not started) — `classification` package + `external.brickognize` + `external.gemini` adapters behind `PartClassifier`; `POST /api/v1/classify/part` (authenticated, multipart) → ranked candidates w/ confidence + `resolutionStatus`; transient photos (no persistence); nullable `part_img_url` column (new Flyway migration) for reference images.
+- Slice 1 — Done: `classification` package (`PartClassifier` port, `HybridPartClassifier`) + `external.brickognize`/`external.gemini` adapters; `POST /api/v1/classify/part` (authenticated, multipart `image` field) → `PartClassificationResponse` (ranked `partSuggestions` w/ `resolutionStatus` RESOLVED/UNRESOLVED + reference image, one `colorSuggestion` w/ `colorId` resolved against the local `colors` table). Classify-and-discard — no photo persistence. No new migration needed — `Part.imageUrl` already covered the reference-image need from Finding 6.
 - Slice 2 (not started) — frontend capture + confirm (client-side downscale) wired to `POST /api/v1/collection/parts`.
-- Known risk carried into slice 1: color accuracy (72.2% in POC) unverified against real photos — Rebrickable's stock renders may have biased the model toward `Trans-` guesses on solid colors. Cheap to re-check later; not blocking.
-- Next: TDD for slice 1 (classifier port + both adapters + endpoint + migration), then slice 2.
+- Known risk carried forward: color accuracy (72.2% in POC) unverified against real photos — Rebrickable's stock renders may have biased the model toward `Trans-` guesses on solid colors. Cheap to re-check later; not blocking.
+- Next: slice 2 (frontend), and the deferred real-photo color re-check.
 
 ## Phase 8 — Productization
 

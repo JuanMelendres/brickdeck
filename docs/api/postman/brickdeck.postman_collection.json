@@ -468,6 +468,19 @@
           }
         }
       ]
+    },
+    {
+      "name": "Classification",
+      "item": [
+        {
+          "name": "Classify part photo",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/v1/classify/part", "host": ["{{baseUrl}}"], "path": ["api", "v1", "classify", "part"] },
+            "body": { "mode": "formdata", "formdata": [{ "key": "image", "type": "file", "src": [] }] }
+          }
+        }
+      ]
     }
   ]
 }
