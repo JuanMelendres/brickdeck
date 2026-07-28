@@ -86,16 +86,16 @@ Success criteria: user sees whether a current price is a good deal, and gets ale
 
 ## Phase 7 — AI-Assisted Classification
 
-Status: Slice 1 done (2026-07-28) — slice 2 (frontend) not started
+Status: Slice 1 + slice 2 done (2026-07-28) — core Phase 7 feature complete
 
 - Photo → part/color suggestion + confidence + user confirm
 - Spike — Done: `docs/superpowers/specs/2026-07-16-phase7-ai-classification-spike.md`. Originally recommended Claude vision; superseded by the POC below.
 - Decision (ADR-013) — Done: POC run against 18 real part+color combos. **Brickognize** (free, LEGO-specialist) wins on part-shape id (77.8%/94.4% base-norm) but returns no color at all. **Google Gemini free tier** (swapped in for Claude vision — no-budget personal project) supplies color candidates (72.2% hit rate, below the 80% gate but accepted as advisory given mandatory confirm-before-save). Chosen slice-1 architecture: **hybrid Brickognize (part) + Gemini (color)**, both plain-REST `external.*` adapters behind a `PartClassifier` port, no Python service.
 - Slice 0 — Done: `RebrickableClient.getPart/getColor` + `PartService.findOrImport`/`ColorService.findOrImport` (cache-first, Rebrickable-backed on miss); `UserPartService` uses these instead of raw repo lookups, so loose-piece manual entry no longer requires the part/color to be pre-imported via a set.
 - Slice 1 — Done: `classification` package (`PartClassifier` port, `HybridPartClassifier`) + `external.brickognize`/`external.gemini` adapters; `POST /api/v1/classify/part` (authenticated, multipart `image` field) → `PartClassificationResponse` (ranked `partSuggestions` w/ `resolutionStatus` RESOLVED/UNRESOLVED + reference image, one `colorSuggestion` w/ `colorId` resolved against the local `colors` table). Classify-and-discard — no photo persistence. No new migration needed — `Part.imageUrl` already covered the reference-image need from Finding 6.
-- Slice 2 (not started) — frontend capture + confirm (client-side downscale) wired to `POST /api/v1/collection/parts`.
+- Slice 2 — Done: `PhotoClassifyDialog` on `/collection` ("Scan a part" button) — file input (client-side downscale via `createImageBitmap`+canvas, spike Finding 5) → `POST /api/v1/classify/part` → ranked part candidates (reference image, resolutionStatus badge, radio-select, top preselected) + one color guess; confirm disabled when `colorId` is null (color not in local catalog); confirm reuses the existing `POST /api/v1/collection/parts` flow, so an `UNRESOLVED` part number resolves via slice 0's find-or-import at save time.
 - Known risk carried forward: color accuracy (72.2% in POC) unverified against real photos — Rebrickable's stock renders may have biased the model toward `Trans-` guesses on solid colors. Cheap to re-check later; not blocking.
-- Next: slice 2 (frontend), and the deferred real-photo color re-check.
+- Next: the deferred real-photo color re-check (not blocking); otherwise Phase 7 core is done.
 
 ## Phase 8 — Productization
 
