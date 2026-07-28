@@ -1,6 +1,8 @@
 package com.brickdeck.api.external.rebrickable.client;
 
+import com.brickdeck.api.external.rebrickable.dto.RebrickableColorResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
+import com.brickdeck.api.external.rebrickable.dto.RebrickablePartResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetPartResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableThemeResponse;
@@ -56,5 +58,21 @@ public class RebrickableClient {
                         .build(setNumber))
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
+    }
+
+    public RebrickablePartResponse getPart(String partNumber) {
+        return rebrickableRestClient
+                .get()
+                .uri("/lego/parts/{partNumber}/", partNumber)
+                .retrieve()
+                .body(RebrickablePartResponse.class);
+    }
+
+    public RebrickableColorResponse getColor(Integer colorId) {
+        return rebrickableRestClient
+                .get()
+                .uri("/lego/colors/{colorId}/", colorId)
+                .retrieve()
+                .body(RebrickableColorResponse.class);
     }
 }

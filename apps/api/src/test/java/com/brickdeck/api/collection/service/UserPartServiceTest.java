@@ -2,8 +2,8 @@ package com.brickdeck.api.collection.service;
 
 import com.brickdeck.api.catalog.entity.Color;
 import com.brickdeck.api.catalog.entity.Part;
-import com.brickdeck.api.catalog.repository.ColorRepository;
-import com.brickdeck.api.catalog.repository.PartRepository;
+import com.brickdeck.api.catalog.service.ColorService;
+import com.brickdeck.api.catalog.service.PartService;
 import com.brickdeck.api.collection.DuplicateCollectionEntryException;
 import com.brickdeck.api.collection.dto.AddUserPartRequest;
 import com.brickdeck.api.collection.dto.UpdateUserPartRequest;
@@ -42,10 +42,10 @@ class UserPartServiceTest {
     private UserPartRepository userPartRepository;
 
     @Mock
-    private PartRepository partRepository;
+    private PartService partService;
 
     @Mock
-    private ColorRepository colorRepository;
+    private ColorService colorService;
 
     @InjectMocks
     private UserPartService userPartService;
@@ -81,8 +81,8 @@ class UserPartServiceTest {
         Part part = brick();
         Color color = red();
 
-        when(partRepository.findByExternalPartNumber("3001")).thenReturn(Optional.of(part));
-        when(colorRepository.findByExternalId(4)).thenReturn(Optional.of(color));
+        when(partService.findOrImport("3001")).thenReturn(part);
+        when(colorService.findOrImport(4)).thenReturn(color);
         when(userPartRepository.existsByUserIdAndPartIdAndColorId(owner.getId(), part.getId(), color.getId()))
                 .thenReturn(false);
         when(userPartRepository.save(any(UserPart.class))).thenAnswer(inv -> {
@@ -109,23 +109,26 @@ class UserPartServiceTest {
     }
 
     @Test
-    void addPartThrowsWhenPartNotInCatalog() {
+    void addPartThrowsWhenPartNotInCatalogOrRebrickable() {
         User owner = owner();
-        when(partRepository.findByExternalPartNumber("9999")).thenReturn(Optional.empty());
+        when(partService.findOrImport("9999"))
+                .thenThrow(new ResourceNotFoundException("Part not found in Rebrickable: 9999"));
 
         assertThatThrownBy(() -> userPartService.addPart(owner, new AddUserPartRequest("9999", 4, 1, null)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("9999");
 
+        verify(colorService, never()).findOrImport(any());
         verify(userPartRepository, never()).save(any(UserPart.class));
     }
 
     @Test
-    void addPartThrowsWhenColorNotInCatalog() {
+    void addPartThrowsWhenColorNotInCatalogOrRebrickable() {
         User owner = owner();
         Part part = brick();
-        when(partRepository.findByExternalPartNumber("3001")).thenReturn(Optional.of(part));
-        when(colorRepository.findByExternalId(999)).thenReturn(Optional.empty());
+        when(partService.findOrImport("3001")).thenReturn(part);
+        when(colorService.findOrImport(999))
+                .thenThrow(new ResourceNotFoundException("Color not found in Rebrickable: 999"));
 
         assertThatThrownBy(() -> userPartService.addPart(owner, new AddUserPartRequest("3001", 999, 1, null)))
                 .isInstanceOf(ResourceNotFoundException.class)
@@ -140,8 +143,8 @@ class UserPartServiceTest {
         Part part = brick();
         Color color = red();
 
-        when(partRepository.findByExternalPartNumber("3001")).thenReturn(Optional.of(part));
-        when(colorRepository.findByExternalId(4)).thenReturn(Optional.of(color));
+        when(partService.findOrImport("3001")).thenReturn(part);
+        when(colorService.findOrImport(4)).thenReturn(color);
         when(userPartRepository.existsByUserIdAndPartIdAndColorId(owner.getId(), part.getId(), color.getId()))
                 .thenReturn(true);
 

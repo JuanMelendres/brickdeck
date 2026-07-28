@@ -2,8 +2,8 @@ package com.brickdeck.api.collection.service;
 
 import com.brickdeck.api.catalog.entity.Color;
 import com.brickdeck.api.catalog.entity.Part;
-import com.brickdeck.api.catalog.repository.ColorRepository;
-import com.brickdeck.api.catalog.repository.PartRepository;
+import com.brickdeck.api.catalog.service.ColorService;
+import com.brickdeck.api.catalog.service.PartService;
 import com.brickdeck.api.collection.DuplicateCollectionEntryException;
 import com.brickdeck.api.collection.dto.AddUserPartRequest;
 import com.brickdeck.api.collection.dto.UpdateUserPartRequest;
@@ -25,25 +25,21 @@ import java.util.UUID;
 public class UserPartService {
 
     private final UserPartRepository userPartRepository;
-    private final PartRepository partRepository;
-    private final ColorRepository colorRepository;
+    private final PartService partService;
+    private final ColorService colorService;
 
     public UserPartService(UserPartRepository userPartRepository,
-                           PartRepository partRepository,
-                           ColorRepository colorRepository) {
+                           PartService partService,
+                           ColorService colorService) {
         this.userPartRepository = userPartRepository;
-        this.partRepository = partRepository;
-        this.colorRepository = colorRepository;
+        this.partService = partService;
+        this.colorService = colorService;
     }
 
     @Transactional
     public UserPartResponse addPart(User owner, AddUserPartRequest request) {
-        Part part = partRepository.findByExternalPartNumber(request.externalPartNumber())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Part not found in catalog: " + request.externalPartNumber()));
-        Color color = colorRepository.findByExternalId(request.colorExternalId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Color not found in catalog: " + request.colorExternalId()));
+        Part part = partService.findOrImport(request.externalPartNumber());
+        Color color = colorService.findOrImport(request.colorExternalId());
 
         if (userPartRepository.existsByUserIdAndPartIdAndColorId(
                 owner.getId(), part.getId(), color.getId())) {

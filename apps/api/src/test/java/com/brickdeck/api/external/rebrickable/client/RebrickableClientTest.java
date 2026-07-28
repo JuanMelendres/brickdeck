@@ -1,6 +1,8 @@
 package com.brickdeck.api.external.rebrickable.client;
 
+import com.brickdeck.api.external.rebrickable.dto.RebrickableColorResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickablePageResponse;
+import com.brickdeck.api.external.rebrickable.dto.RebrickablePartResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableSetPartResponse;
 import com.brickdeck.api.external.rebrickable.dto.RebrickableThemeResponse;
 import org.junit.jupiter.api.Test;
@@ -91,6 +93,55 @@ class RebrickableClientTest {
         assertThat(line.color().name()).isEqualTo("Red");
         assertThat(line.color().rgb()).isEqualTo("C91A09");
         assertThat(line.color().transparent()).isFalse();
+        server.verify();
+    }
+
+    @Test
+    void getPartReturnsMappedPart() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        RebrickableClient client = new RebrickableClient(builder.build());
+
+        server.expect(requestTo("/lego/parts/3001/"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(
+                        """
+                        {
+                          "part_num": "3001",
+                          "name": "Brick 2 x 4",
+                          "part_cat_id": 11,
+                          "part_url": "https://rebrickable.com/parts/3001/",
+                          "part_img_url": "https://cdn.rebrickable.com/media/parts/3001.jpg"
+                        }
+                        """,
+                        MediaType.APPLICATION_JSON));
+
+        RebrickablePartResponse response = client.getPart("3001");
+
+        assertThat(response.partNum()).isEqualTo("3001");
+        assertThat(response.name()).isEqualTo("Brick 2 x 4");
+        assertThat(response.partCatId()).isEqualTo(11);
+        server.verify();
+    }
+
+    @Test
+    void getColorReturnsMappedColor() {
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        RebrickableClient client = new RebrickableClient(builder.build());
+
+        server.expect(requestTo("/lego/colors/4/"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(
+                        "{\"id\":4,\"name\":\"Red\",\"rgb\":\"C91A09\",\"is_trans\":false}",
+                        MediaType.APPLICATION_JSON));
+
+        RebrickableColorResponse response = client.getColor(4);
+
+        assertThat(response.id()).isEqualTo(4);
+        assertThat(response.name()).isEqualTo("Red");
+        assertThat(response.rgb()).isEqualTo("C91A09");
+        assertThat(response.transparent()).isFalse();
         server.verify();
     }
 }
