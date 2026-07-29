@@ -5,6 +5,9 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+minimumReleaseAgeExclude:
+  - jsdom@30.0.1
+
 # CVE-2026-41305 / GHSA-qx2v-qp2m-jg93: postcss does not escape `</style>` when
 # stringifying, which is an XSS vector wherever user-submitted CSS is parsed and
 # re-embedded in a <style> tag. Fixed in 8.5.10, but next@16.2.10 (the latest
