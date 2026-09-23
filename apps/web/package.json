@@ -24,7 +24,7 @@
     "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-hook-form": "^7.82.0",
+    "react-hook-form": "^7.83.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "@types/node": "^26.1.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "jsdom": "^30.0.1",
